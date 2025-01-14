@@ -59,7 +59,7 @@ import AdminLoginProtectedRoute from "./protected/adminLoginProtected";
 
 //admin
 import AdminLoginpage from "./pages/Admin/AdminLoginpage";
-import Adminhome from "./pages/Admin/adminHome";
+import Adminhome from "./pages/Admin/AdminHome";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 
 import Users from "./components/Admin/Users"
