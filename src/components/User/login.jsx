@@ -1,7 +1,7 @@
 import { Label } from "../ui/label";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { Input } from "../ui/input";
+import { Input } from "../ui/Input";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "../ui/button";
 

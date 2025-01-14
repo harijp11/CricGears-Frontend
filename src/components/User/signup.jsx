@@ -8,7 +8,7 @@ import { addUser } from "../../redux/Slice/UserSlice";
 import { useDispatch } from "react-redux";
 import { toast,Toaster } from "sonner";
 
-import { Input } from "../ui/input";
+import { Input } from "../ui/Input";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import { validateSignupForm } from "../../util/signUpValidation";

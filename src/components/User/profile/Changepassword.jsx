@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
+import { Input } from "../../ui/Input";
 import { AlertCircle, Eye, EyeOff,ArrowLeft } from "lucide-react";
 import ConfirmationModal from "../../shared/confirmationModal";
 import axiosInstance from "../../../AxiosInstance";

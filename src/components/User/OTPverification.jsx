@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Input } from "../ui/Input";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { DialogClose } from "@radix-ui/react-dialog";
