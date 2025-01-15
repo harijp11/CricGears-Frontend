@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/Input";
 import _ from "lodash";
 
-export default function SearchComponent({ setsearch }) {
+export default function SearchComponent({ setsearch,search}) {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [tempSearch, setTempSearch] = useState("");
 
@@ -35,7 +35,7 @@ export default function SearchComponent({ setsearch }) {
           type='search'
           placeholder='Search...'
           className='w-full h-10 pl-3 pr-10'
-          value={tempSearch}
+          value={search}
           onChange={handleSearchChange}
         />
       </div>
