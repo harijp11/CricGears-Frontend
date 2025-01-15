@@ -27,10 +27,7 @@ export default function AboutPage() {
                   commitment to quality, we've become a trusted name among
                   professionals and enthusiasts alike. Our journey began in a
                   small workshop in Yorkshire, where master craftsman James
-                  Wilson spent countless hours perfecting his technique. What
-                  started as a small family business has grown into one of
-                  cricket's most respected bat makers, serving players from
-                  village greens to international stadiums. Through dedication
+                  Wilson spent countless hours perfecting his technique.Through dedication
                   and innovation, we've earned partnerships with leading cricket
                   academies and professional teams worldwide, helping nurture
                   the next generation of cricket talent. Our commitment to
@@ -59,13 +56,7 @@ export default function AboutPage() {
                   practices, sourcing our English willow from certified
                   sustainable forests. We've also pioneered innovative recycling
                   programs for old cricket bats, giving them new life as
-                  training equipment for youth programs. Our workshop runs on
-                  renewable energy, and we're proud to be one of the first
-                  carbon-neutral cricket equipment manufacturers in the
-                  industry. Community engagement remains at our core - we
-                  regularly host workshops for aspiring young cricketers,
-                  sharing our knowledge and passion for the craft with the next
-                  generation. Through our 'Bats for Future Stars' initiative,
+                  training equipment for youth programs.Through our 'Bats for Future Stars' initiative,
                   we've donated over 1,000 bats to underprivileged young
                   cricketers across the globe, helping spread the joy of cricket
                   to every corner of the world.
