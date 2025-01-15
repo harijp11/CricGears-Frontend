@@ -56,7 +56,10 @@ export default function AboutPage() {
                   practices, sourcing our English willow from certified
                   sustainable forests. We've also pioneered innovative recycling
                   programs for old cricket bats, giving them new life as
-                  training equipment for youth programs.Through our 'Bats for Future Stars' initiative,
+                  training equipment for youth programs. Our workshop runs on
+                  renewable energy, and we're proud to be one of the first
+                  carbon-neutral cricket equipment manufacturers in the
+                  industry. Through our 'Bats for Future Stars' initiative,
                   we've donated over 1,000 bats to underprivileged young
                   cricketers across the globe, helping spread the joy of cricket
                   to every corner of the world.
