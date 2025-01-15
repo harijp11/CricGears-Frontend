@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tag, IndianRupee, Calendar, Users, Copy } from "lucide-react";
+import { Tag, IndianRupee, Calendar, Users, Copy,Ticket } from "lucide-react";
 import { FetchCouponsApi } from "../../../APIs/coupon";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
@@ -83,14 +83,22 @@ export default function userCouponList(){
         </Breadcrumb>
       </div>
     </header>
+    {coupons.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <h2 className="text-xl font-semibold text-gray-700 mb-2"><Ticket/>No Coupons Available</h2>
+          <p className="text-gray-500">Check back later for new discount offers!</p>
+        </div>
+      ) : (
         <div className="space-y-4">
           {coupons.map((coupon) => (
+            // Your existing coupon card code
             <div
               key={coupon._id}
               className={`bg-white ${
                 coupon.usageLimit == couponUsed ? "opacity-40" : ""
               } rounded-lg shadow-md p-6 relative hover:shadow-lg transition duration-300 border border-gray-200`}
             >
+              {/* Rest of your existing coupon card JSX */}
               <div className="flex flex-col h-full">
                 {couponUsed == coupon.usageLimit && (
                   <h1 className="text-red-800 font-bold  lg:text-5xl self-center absolute top-1/2">
@@ -156,7 +164,8 @@ export default function userCouponList(){
             </div>
           ))}
         </div>
-      </div>
+      )}
     </div>
-  );
+  </div>
+);
 }
