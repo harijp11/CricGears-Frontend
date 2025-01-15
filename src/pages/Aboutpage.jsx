@@ -28,7 +28,7 @@ export default function AboutPage() {
                 Every bat we craft is a testament to our dedication, combining traditional techniques with cutting-edge technology to deliver unparalleled performance on the pitch.
               </p>
             </div>
-            <div className="md:w-1/2">
+            <div className="">
               <img
                 src={crafting}
                 alt="Craftsman working on a cricket bat"
