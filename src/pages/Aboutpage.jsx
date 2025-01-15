@@ -2,6 +2,7 @@ import React from 'react';
 import { BoltIcon as Bat, Award, Truck, Headphones } from 'lucide-react';
 import { SiteHeader } from '../components/ui/header';
 import { SiteFooter } from '../components/ui/footer';
+import crafting from "../../public/crafting.jpeg"
 
 export default function AboutPage() {
   return (
@@ -29,7 +30,7 @@ export default function AboutPage() {
             </div>
             <div className="md:w-1/2">
               <img
-                src="/placeholder.svg?height=300&width=400"
+                src={crafting}
                 alt="Craftsman working on a cricket bat"
                 className="rounded-lg shadow-md w-full h-auto"
               />
