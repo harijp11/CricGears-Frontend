@@ -4,8 +4,10 @@ import { SiteFooter } from '../ui/footer';
 import { Card } from '../ui/card';
 import { Star, Truck, Shield, Package, Users, DollarSign } from 'lucide-react';
 import Homeimg from '../../assets/picsart_version-rGc4ycOkG-transformed.jpeg';
+import { useNavigate } from 'react-router-dom';
 
 export function Home() {
+  const navigate = useNavigate()
   return (
     <div className="flex flex-col min-h-screen">
       <SiteAdminHeader />
@@ -53,7 +55,9 @@ export function Home() {
               ))}
             </div>
             <div className="mt-12 text-center">
-              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-blue-600 text-white hover:bg-blue-600/90 h-11 px-8">
+              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-blue-600 text-white hover:bg-blue-600/90 h-11 px-8"
+              onClick={()=>navigate("/admin/Dashboard")}
+              >
                 View Detailed Reports
               </button>
             </div>
