@@ -2,7 +2,7 @@ import React from 'react';
 import { BoltIcon as Bat, Award, Truck, Headphones } from 'lucide-react';
 import { SiteHeader } from '../components/ui/header';
 import { SiteFooter } from '../components/ui/footer';
-import crafting from "../../public/crafting.jpeg"
+import crafting from "../../public/craftman with bat.webp"
 
 export default function AboutPage() {
   return (
