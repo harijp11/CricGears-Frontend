@@ -22,13 +22,16 @@ export default function AboutPage() {
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="md:w-1/2">
               <p className="text-lg mb-4">
-                Founded in 2005, our passion for cricket drove us to create the finest bats in the game. With years of expertise and a commitment to quality, we've become a trusted name among professionals and enthusiasts alike.
+              Founded in 2005, our passion for cricket drove us to create the finest bats in the game. With years of expertise and a commitment to quality, we've become a trusted name among professionals and enthusiasts alike. Our journey began in a small workshop in Yorkshire, where master
+               craftsman James Wilson spent countless hours perfecting his technique. What started as a small family business has grown into one of cricket's most respected bat makers, serving players from village greens to international stadiums.
               </p>
               <p className="text-lg">
-                Every bat we craft is a testament to our dedication, combining traditional techniques with cutting-edge technology to deliver unparalleled performance on the pitch.
+              Every bat we craft is a testament to our dedication, combining traditional techniques with cutting-edge technology to deliver unparalleled performance on the pitch. We carefully select
+               each piece of willow, considering factors like grain structure, weight, and density to ensure optimal performance. Our seasoned craftsmen spend up to 12 hours on each bat, meticulously shaping and pressing the willow
+               to achieve the perfect balance of power and control. We're not just making cricket bats - we're crafting instruments of excellence that help players achieve their full potential.
               </p>
             </div>
-            <div className="">
+            <div className="md:w-1/2">
               <img
                 src={crafting}
                 alt="Craftsman working on a cricket bat"
