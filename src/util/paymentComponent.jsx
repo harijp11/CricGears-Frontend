@@ -36,25 +36,19 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
     try {
       // Fetch latest cart data
       const cartResponse = await axiosInstance.get(`/user/fetchCart/${userData._id}`);
-      const latestCartItems = cartResponse.data.cartItems.items;
-      
-      // Compare only relevant cart item properties
-      const cartChanged = !cartItems.every(item => {
-        const latestItem = latestCartItems.find(latest => latest.productId._id === item.productId._id);
-        return latestItem && 
-               latestItem.qty === item.qty && 
-               latestItem.size === item.size;
-      });
-      
-      if (cartChanged) {
-        toast.info("Cart data has changed. Please review your order.");
+      const latestTotalAmount = cartResponse.data.cartItems.totalCartPrice;
+      const latestTotalDiscount = cartResponse.data.cartItems.totalDiscount || 0;
+
+      // Compare total amounts
+      if (total !== latestTotalAmount) {
+        toast.info("Order amount has changed. Please review your order.");
         navigate("/cart");
         return false;
       }
 
       // Check product availability
       const availabilityResponse = await axiosInstance.post("/user/product/available", {
-        cartItems: latestCartItems,
+        cartItems: cartItems,
       });
 
       if (!availabilityResponse.data.success) {
@@ -65,7 +59,6 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
 
       return true;
     } catch (error) {
-      console.error("Cart validation error:", error);
       toast.error("Failed to validate cart data");
       return false;
     }
@@ -80,7 +73,7 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
     try {
       setPaymentInProgress(true);
 
-      // Single validation before payment
+      // Validate cart before proceeding
       const isValid = await validateCartBeforePayment();
       if (!isValid) {
         setPaymentInProgress(false);
@@ -95,12 +88,19 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
         description: "CRICGEARS E-COMMERCE PAYMENT",
         handler: async function(response) {
           if (response.razorpay_payment_id) {
-            // Proceed directly to order placement on successful payment
-            handlePlaceOrder("Paid");
+            // Revalidate one final time before confirming order
+            const finalValidation = await validateCartBeforePayment();
+            if (finalValidation) {
+              handlePlaceOrder("Paid");
+            } else {
+              toast.error("Order details changed during payment. Please try again.");
+              navigate("/cart");
+            }
           } else {
             toast.error("Payment failed. Please try again.");
-            setPaymentInProgress(false);
+            navigate("/checkout");
           }
+          setPaymentInProgress(false);
         },
         prefill: {
           name: "Hari jp",
@@ -113,19 +113,19 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
         modal: {
           ondismiss: function() {
             setPaymentInProgress(false);
-            toast.info("Payment cancelled");
+            navigate("/checkout");
+            toast.info("Payment not completed");
           }
         }
       };
 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function(response) {
-        setPaymentInProgress(false);
         handlePlaceOrder("Failed");
+        navigate("/checkout");
       });
       rzp.open();
     } catch (error) {
-      console.error("Payment initialization error:", error);
       setPaymentInProgress(false);
       toast.error("Payment initialization failed");
     }
