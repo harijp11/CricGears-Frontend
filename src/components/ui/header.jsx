@@ -25,7 +25,7 @@ export function SiteHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="mr-2 sm:mr-4 md:hidden"
+              className="mr-2 "
               onClick={toggleMenu}
             >
               <Menu className="h-5 w-5" />
