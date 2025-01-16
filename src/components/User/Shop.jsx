@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { Skeleton } from "../ui/skeleton";
 import FilterSidebar from "./FilterdSidebar";
 import ProductCardContainer from "../ui/ProductContainer";
 import SearchComponent from "../ui/Searchcomponent";
@@ -17,13 +16,25 @@ import { toast } from "sonner";
 import axiosInstance from "../../AxiosInstance";
 import Pagination from "../shared/Pagination";
 
-const LoadingProductCard = () => (
-  <div className="flex flex-col gap-4 w-full">
-    <Skeleton className="h-[200px] w-full rounded-lg" />
-    <div className="space-y-2">
-      <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-4 w-1/2" />
+const ProductSkeleton = () => (
+  <div className="bg-white rounded-lg p-4 shadow-sm">
+    <div className="animate-pulse">
+      <div className="w-full h-48 bg-gray-200 rounded-md mb-4" />
+      <div className="w-3/4 h-4 bg-gray-200 mb-2 rounded" />
+      <div className="w-1/2 h-4 bg-gray-200 mb-4 rounded" />
+      <div className="flex justify-between items-center">
+        <div className="w-1/3 h-6 bg-gray-200 rounded" />
+        <div className="w-16 h-8 bg-gray-200 rounded-full" />
+      </div>
     </div>
+  </div>
+);
+
+const LoadingGrid = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {[...Array(8)].map((_, index) => (
+      <ProductSkeleton key={index} />
+    ))}
   </div>
 );
 
@@ -32,7 +43,6 @@ const ShopNow = () => {
     category: [],
     size: [],
   });
-
   const [search, setsearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 500);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,10 +55,7 @@ const ShopNow = () => {
   const productsPerPage = 8;
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
 
   async function fetchNewArrivals() {
     setIsLoading(true);
@@ -93,10 +100,27 @@ const ShopNow = () => {
 
   useEffect(() => {
     fetchNewArrivals();
+    console.log(search);
   }, [debouncedSearch, page, selectedFilters, search, sortBy]);
 
   return (
     <div className="container md:mx-auto md:px-4 md:py-8">
+      <style jsx global>{`
+        @keyframes pulse {
+          0% {
+            opacity: 0.6;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0.6;
+          }
+        }
+        .animate-pulse {
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+      `}</style>
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Responsive Sidebar */}
         <Sheet>
@@ -130,8 +154,8 @@ const ShopNow = () => {
               <SearchComponent setsearch={setsearch} />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" disabled={isLoading}>
-                    Sort by: {sortBy || "Default"} <ChevronDown className="ml-2 h-4 w-4" />
+                  <Button variant="outline">
+                    Sort by: {sortBy} <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -158,23 +182,15 @@ const ShopNow = () => {
             </div>
           </div>
 
-          {/* Loading State or Products */}
+          {/* Product Grid with Loading State */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, index) => (
-                <LoadingProductCard key={index} />
-              ))}
-            </div>
+            <LoadingGrid />
           ) : (
-            <>
-              <ProductCardContainer products={products} />
-              {products.length > 0 && (
-                <Pagination page={page} setPage={setPage} totalPages={totalPages} />
-              )}
-            </>
+            <ProductCardContainer products={products} />
           )}
         </div>
       </div>
+      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
     </div>
   );
 };
