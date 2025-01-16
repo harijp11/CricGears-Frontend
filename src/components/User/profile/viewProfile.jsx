@@ -128,7 +128,7 @@ function Myprofile() {
                       name: ''
                     }));
                   }}
-               className="shadow-sm border-gray-400 focus:border-black focus:ring-black block w-full h-12 text-lg pl-4 rounded-md"
+                  className="shadow-sm border-gray-900 focus:border-black focus:ring-black block w-full h-12 text-lg pl-4 rounded-md"
                 />
                 {error.name && (
                   <span className="text-red-600 text-sm mt-1">
