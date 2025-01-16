@@ -44,7 +44,7 @@ const ShopNow = () => {
     size: [],
   });
   const [search, setsearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 500);
+  const [debouncedSearch] = useDebounce(search, 200);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const limit = 10;
