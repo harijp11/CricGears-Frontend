@@ -37,14 +37,17 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
       // Fetch latest cart data
       const cartResponse = await axiosInstance.get(`/user/fetchCart/${userData._id}`);
       const latestCartItems = cartResponse.data.cartItems.items;
-      const latestTotalAmount = cartResponse.data.cartItems.totalCartPrice;
-
-      // Compare cart items and total
-      const cartChanged = JSON.stringify(latestCartItems) !== JSON.stringify(cartItems) || 
-                         latestTotalAmount !== total;
+      
+      // Compare only relevant cart item properties
+      const cartChanged = !cartItems.every(item => {
+        const latestItem = latestCartItems.find(latest => latest.productId._id === item.productId._id);
+        return latestItem && 
+               latestItem.qty === item.qty && 
+               latestItem.size === item.size;
+      });
       
       if (cartChanged) {
-        toast.error("Cart data has changed. Please review your order.");
+        toast.info("Cart data has changed. Please review your order.");
         navigate("/cart");
         return false;
       }
@@ -62,6 +65,7 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
 
       return true;
     } catch (error) {
+      console.error("Cart validation error:", error);
       toast.error("Failed to validate cart data");
       return false;
     }
@@ -76,7 +80,7 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
     try {
       setPaymentInProgress(true);
 
-      // Validate cart before proceeding
+      // Single validation before payment
       const isValid = await validateCartBeforePayment();
       if (!isValid) {
         setPaymentInProgress(false);
@@ -91,19 +95,12 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
         description: "CRICGEARS E-COMMERCE PAYMENT",
         handler: async function(response) {
           if (response.razorpay_payment_id) {
-            // Revalidate one final time before confirming order
-            const finalValidation = await validateCartBeforePayment();
-            if (finalValidation) {
-              handlePlaceOrder("Paid");
-            } else {
-              toast.error("Order details changed during payment. Please try again.");
-              navigate("/cart");
-            }
+            // Proceed directly to order placement on successful payment
+            handlePlaceOrder("Paid");
           } else {
             toast.error("Payment failed. Please try again.");
-            navigate("/checkout");
+            setPaymentInProgress(false);
           }
-          setPaymentInProgress(false);
         },
         prefill: {
           name: "Hari jp",
@@ -116,19 +113,19 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
         modal: {
           ondismiss: function() {
             setPaymentInProgress(false);
-            navigate("/checkout");
-            toast.info("Payment not completed");
+            toast.info("Payment cancelled");
           }
         }
       };
 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function(response) {
+        setPaymentInProgress(false);
         handlePlaceOrder("Failed");
-        navigate("/checkout");
       });
       rzp.open();
     } catch (error) {
+      console.error("Payment initialization error:", error);
       setPaymentInProgress(false);
       toast.error("Payment initialization failed");
     }
