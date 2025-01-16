@@ -616,6 +616,7 @@ export default function Checkout() {
                 total={total_price_with_discount.toFixed(2)}
                 handlePlaceOrder={handlePlaceOrder}
                 cartItems={cartItems}
+                userData={userData} 
               />
             )}
             {selectedPaymentMethod === "wallet" && selectedAddress && (
