@@ -128,7 +128,7 @@ function Myprofile() {
                       name: ''
                     }));
                   }}
-                  className="shadow-sm focus:ring-black focus:border-black block w-full h-12 text-lg pl-4 border-gray-300 rounded-md"
+                  className="shadow-sm focus:ring-black focus:border-black focus:bg-black bg-gray-300 block w-full h-12 text-lg pl-4 border-gray-300 rounded-md"
                 />
                 {error.name && (
                   <span className="text-red-600 text-sm mt-1">
@@ -168,7 +168,7 @@ function Myprofile() {
                       phone: ''
                     }));
                   }}
-                  className="shadow-sm focus:ring-black focus:border-black block w-full h-12 text-lg pl-4 border-gray-300 rounded-md"
+                  className="shadow-sm focus:ring-black focus:border-black focus:bg-black bg-gray-300 block w-full h-12 text-lg pl-4 border-gray-300 rounded-md"
                 />
                 {error.phone && (
                   <span className="text-red-600 text-sm mt-1">
