@@ -145,7 +145,7 @@ function Myprofile() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email
             </label>
-            <p className="text-lg text-gray-900">{userData?.email}</p>
+            <p className="shadow-sm border-gray-400 text-lg text-gray-900">{userData?.email}</p>
           </div>
         </div>
 
@@ -168,7 +168,7 @@ function Myprofile() {
                       phone: ''
                     }));
                   }}
-                  className="shadow-sm focus:ring-black focus:border-black block w-full h-12 text-lg pl-4 border-gray-300 rounded-md"
+                  className="border border-gray-400 focus:border-black focus:ring-black block w-full h-12 text-lg pl-4 rounded-md"
                 />
                 {error.phone && (
                   <span className="text-red-600 text-sm mt-1">
