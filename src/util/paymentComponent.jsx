@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../AxiosInstance";
 
-function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
+function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
   const navigate = useNavigate();
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [paymentInProgress, setPaymentInProgress] = useState(false);
@@ -32,34 +32,17 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
     };
   }, []);
 
-  const validateCartBeforePayment = async () => {
+  const checkProductAvailability = async () => {
     try {
-      // Fetch latest cart data
-      const cartResponse = await axiosInstance.get(`/user/fetchCart/${userData._id}`);
-      const latestTotalAmount = cartResponse.data.cartItems.totalCartPrice;
-      const latestTotalDiscount = cartResponse.data.cartItems.totalDiscount || 0;
-
-      // Compare total amounts
-      if (total !== latestTotalAmount) {
-        toast.info("Order amount has changed. Please review your order.");
-        navigate("/cart");
+      const res = await axiosInstance.post("/user/product/available", { cartItems });
+      if (!res.data.success) {
+        toast.error(res.data.message);
+        navigate("/checkout");
         return false;
       }
-
-      // Check product availability
-      const availabilityResponse = await axiosInstance.post("/user/product/available", {
-        cartItems: cartItems,
-      });
-
-      if (!availabilityResponse.data.success) {
-        toast.error(availabilityResponse.data.message);
-        navigate("/cart");
-        return false;
-      }
-
       return true;
-    } catch (error) {
-      toast.error("Failed to validate cart data");
+    } catch (err) {
+      toast.error("Error checking product availability!");
       return false;
     }
   };
@@ -71,14 +54,10 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
     }
 
     try {
-      setPaymentInProgress(true);
+      const isAvailable = await checkProductAvailability();
+      if (!isAvailable) return;
 
-      // Validate cart before proceeding
-      const isValid = await validateCartBeforePayment();
-      if (!isValid) {
-        setPaymentInProgress(false);
-        return;
-      }
+      setPaymentInProgress(true);
 
       const options = {
         key: "rzp_test_fu3JZWbM4Hq2Jt",
@@ -86,16 +65,9 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
         currency: "INR",
         name: "CRICGEARS",
         description: "CRICGEARS E-COMMERCE PAYMENT",
-        handler: async function(response) {
+        handler: function(response) {
           if (response.razorpay_payment_id) {
-            // Revalidate one final time before confirming order
-            const finalValidation = await validateCartBeforePayment();
-            if (finalValidation) {
-              handlePlaceOrder("Paid");
-            } else {
-              toast.error("Order details changed during payment. Please try again.");
-              navigate("/cart");
-            }
+            handlePlaceOrder("Paid");
           } else {
             toast.error("Payment failed. Please try again.");
             navigate("/checkout");
@@ -121,7 +93,7 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems, userData }) {
 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function(response) {
-        handlePlaceOrder("Failed");
+       handlePlaceOrder("Failed")
         navigate("/checkout");
       });
       rzp.open();
