@@ -160,7 +160,7 @@ function ProductCard({ product, categories, setReload, offers }) {
             className="data-[state=checked]:bg-indigo-600"
           />
           <span className="text-sm font-medium">
-            {product.isActive ? "list" : "Unlist"}
+            {product.isActive ?  "Unlist" : "list" }
           </span>
         </div>
       </TableCell>
