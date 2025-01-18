@@ -18,7 +18,7 @@ export default function ForgotPassword(){
         const response = await axiosInstance.post("/user/forgotPassword", {email})
         toast.success(response.data.message)
         setIsOTPDialogOpen(true)
-        console.log(response.data.otp); 
+        // console.log(response.data.otp); 
        }catch(err){
         if (err.response && err.response.status === 404) {
             return toast.error(err.response.data.message);

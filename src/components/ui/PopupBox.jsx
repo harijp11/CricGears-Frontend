@@ -24,14 +24,14 @@ export function PopupBox({isOpen, setIsPopupOpen}) {
     try{
       if(adminData){
           const response =await axiosInstance.post('/admin/logout')
-          console.log(response);
+          // console.log(response);
           dispatch(logoutAdmin())
           navigate("/admin/login")
           setIsPopupOpen(false)
       }else{
     const response=await axiosInstance.post('/user/logout')
     
-    console.log(response);
+    // console.log(response);
     
     dispatch(logoutUser());
 

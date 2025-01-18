@@ -42,7 +42,7 @@ export default function Category() {
       );
       setTotalPages(response.data.totalPages);
       setCategories(response.data.categories);
-      console.log("kkkkkkkkkkkkkkkkkkkkkkkk",response.data)
+      // console.log("kkkkkkkkkkkkkkkkkkkkkkkk",response.data)
     } catch (err) {
       if (err.response && err.response.status === 404) {
         return toast.error(err.response.data.message);
@@ -208,7 +208,6 @@ export default function Category() {
                               <DropdownMenuItem
                             onClick={() => {
                               if (categoryOffer) {
-                                console.log(categoryOffer._id)
                                 removeCategoryOffer(categoryOffer._id,category._id);
                               } else {
                                 navigate(

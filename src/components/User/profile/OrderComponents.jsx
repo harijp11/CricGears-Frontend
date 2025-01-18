@@ -56,7 +56,7 @@ export default function OrdersComponent() {
       const response = await axiosInstance.get(
         `/user/orders/${userData._id}?page=${page}&limit=${limit}`
       );
-      console.log(response.data.orders.map((or)=>or.orderItems))
+  
       setTotalPages(response.data.totalPages);
       setPage(response.data.currentPage);
       setorders(response.data.orders);
@@ -127,10 +127,7 @@ export default function OrdersComponent() {
       message: "Are you sure you want to return this order?",
       onConfirm: async (reason, explanation) => {
         try {
-          console.log("reason::>", reason);
-          console.log("explanation::::::>", explanation);
-          console.log("orderId:::::::>", orderId);
-          console.log("itemId::::::>", itemId);
+         
           //register return req
           const response = await axiosInstance.post("/user/return/request", {
             reason,

@@ -27,14 +27,14 @@ const AddCategoryOffer = () => {
 
     try {
       const target_type = "category";
-      console.log(
-        "evrything",
-        id,
-        offerName,
-        Number(offerValue),
-        new Date(offerExpairyDate).toISOString(),
-        target_type
-      );
+      // console.log(
+      //   "evrything",
+      //   id,
+      //   offerName,
+      //   Number(offerValue),
+      //   new Date(offerExpairyDate).toISOString(),
+      //   target_type
+      // );
 
       const response = await addCategoryOfferApi(
         id,

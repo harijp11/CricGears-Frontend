@@ -47,9 +47,7 @@ export default function Cart() {
     try {
       const response = await axiosInstance.get(
         `/user/fetchCart/${userData._id}`
-      );
-      console.log("cartdataaaa",response.data);
-      
+      );   
       setCartItems(response.data.cartItems.items);
       setSubtota(response.data.cartItems.totalCartPrice);
     } catch (err) {
@@ -75,7 +73,7 @@ export default function Cart() {
         }
     }catch(err){
         if (err.response) {
-            console.log(err.response.data.message);
+            // console.log(err.response.data.message);
           }
           console.log(err);
         }

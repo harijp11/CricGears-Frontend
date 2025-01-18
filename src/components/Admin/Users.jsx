@@ -70,7 +70,7 @@ export default function Users(){
                 isActive
                })
                const res=await axiosInstance.post('/user/logout')
-               console.log(res);
+              //  console.log(res);
                setToggle(!toggle)
                toast.success(response.data.message)
                dispatch(logoutUser())

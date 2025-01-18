@@ -181,7 +181,7 @@ export function Login() {
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   try {
-                    console.log(credentialResponse);
+                    // console.log(credentialResponse);
 
                     const decodeData = jwtDecode(credentialResponse.credential);
                     setGoogleData(decodeData);

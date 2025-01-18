@@ -100,7 +100,7 @@ const ShopNow = () => {
 
   useEffect(() => {
     fetchNewArrivals();
-    console.log(search);
+    // console.log(search);
   }, [debouncedSearch, page, selectedFilters, search, sortBy]);
 
   return (
