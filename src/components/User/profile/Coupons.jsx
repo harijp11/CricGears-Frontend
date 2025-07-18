@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Tag, IndianRupee, Calendar, Users, Copy,Ticket } from "lucide-react";
-import { FetchCouponsApi } from "../../../APIs/coupon";
+import { FetchCouponsApi } from "../../../services/coupon";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import {

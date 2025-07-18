@@ -15,6 +15,7 @@ import SearchComponent from "../ui/Searchcomponent";
 import { toast } from "sonner";
 import axiosInstance from "../../AxiosInstance";
 import Pagination from "../shared/Pagination";
+import { fetchNewArrivalsAPI } from "../../services/productsService";
 
 const ProductSkeleton = () => (
   <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -60,16 +61,14 @@ const ShopNow = () => {
   async function fetchNewArrivals() {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get("/user/fetchProducts", {
-        params: {
-          page,
-          limit,
-          category: selectedFilters.category.join(","),
-          size: selectedFilters.size.join(","),
-          search: debouncedSearch,
-          sortBy,
-        },
-      });
+      const response = await fetchNewArrivalsAPI({
+      page,
+      limit,
+      category: selectedFilters.category,
+      size: selectedFilters.size,
+      search: debouncedSearch,
+      sortBy,
+    });
 
       if (response.data.success) {
         setTotalPages(response.data.totalPages);

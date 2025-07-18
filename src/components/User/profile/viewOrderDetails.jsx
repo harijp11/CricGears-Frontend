@@ -14,6 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../ui/breadcrumb";
+import { downloadInvoiceAPI, getOrderByIdAPI } from "../../../services/orderService";
 
 export default function ViewOrderDetails() {
   const { id } = useParams();
@@ -23,7 +24,7 @@ export default function ViewOrderDetails() {
 
   async function fetchOrderDetails() {
     try {
-      const response = await axiosInstance.get(`/user/order/${id}`);
+      const response = await getOrderByIdAPI(id);
       // console.log(response?.data?.order);
       setOrderData(response?.data?.order || {});
     } catch (err) {
@@ -33,10 +34,7 @@ export default function ViewOrderDetails() {
 
   async function handleDowloadInvoice (){
     try {
-      const response = await axiosInstance.post(`/user/download/invoice`,
-        {orderData},
-        {responseType:"blob"}
-      );
+      const response = await downloadInvoiceAPI(orderData);;
 
       const blob = new Blob([response.data], { type: "application/pdf" });
       saveAs(blob, "invoice.pdf");

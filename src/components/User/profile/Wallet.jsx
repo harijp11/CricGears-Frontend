@@ -18,7 +18,7 @@ import Pagination from "../../shared/Pagination";
 
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
-import { addMoneytoWalletApi, fetchWalletInfoApi } from "../../../APIs/wallet";
+import { addMoneytoWalletApi,fetchWalletInfoApi } from "../../../services/wallet";
 
 function Wallet() {
 

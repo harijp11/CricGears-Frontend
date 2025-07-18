@@ -1,7 +1,7 @@
-import { addCategoryOfferApi } from "../../../APIs/OffersApi";
+import { addCategoryOfferApi } from "../../../services/OffersApi";
 import { validateOfferForm } from "../../../util/categoryOfferValidation";
 import {ArrowLeft} from "lucide-react"
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 

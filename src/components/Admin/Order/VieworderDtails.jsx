@@ -13,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../ui/breadcrumb";
+import { getOrderDetailsByIdAPI } from "../../../services/orderService";
 
 export default function ViewOrderDetailsAdmin() {
   const adminData = useSelector((store) => store.admin.adminDatas);
@@ -23,7 +24,7 @@ export default function ViewOrderDetailsAdmin() {
 
   async function fetchOrderDetails() {
     try {
-      const response = await axiosInstance.get(`/admin/order/${id}`);
+      const response = await getOrderDetailsByIdAPI(id);
       setorderData(response?.data?.order || {});
     } catch (err) {
       console.log(err);

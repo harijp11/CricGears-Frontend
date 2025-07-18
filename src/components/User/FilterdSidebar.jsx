@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { Checkbox } from "../ui/checkbox";
-import axiosInstance from "../../AxiosInstance";
+import { fetchCategoriesAPI } from "../../services/categoryService";
 
 const FilterSidebar = ({ className, selectedFilters, setSelectedFilters }) => {
   const [categories, setCategories] = useState([]);
@@ -16,7 +16,7 @@ const FilterSidebar = ({ className, selectedFilters, setSelectedFilters }) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axiosInstance.get("/user/categories");
+      const response = await fetchCategoriesAPI();
       if (response.data.success) {
         setCategories(response.data.categories);
       }

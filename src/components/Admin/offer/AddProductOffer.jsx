@@ -1,9 +1,10 @@
-import { addProductOfferApi } from "../../../APIs/OffersApi";
+
 import React, { useState } from "react";
 import {ArrowLeft} from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { validateProductOfferForm } from "../../../util/ProductOfferValidation";
+import { addProductOfferApi } from "../../../services/OffersApi";
 
 const AddProductOffer =() => {
     const { id, productName } = useParams();

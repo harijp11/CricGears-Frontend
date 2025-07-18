@@ -18,6 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../ui/breadcrumb";
+import { cancelOrderItemAPI, finishPaymentAPI, getUserOrdersAPI, requestReturnAPI } from "../../../services/orderService";
 
 export default function OrdersComponent() {
   const navigate = useNavigate();
@@ -53,13 +54,11 @@ export default function OrdersComponent() {
 
   async function fetchOrders() {
     try {
-      const response = await axiosInstance.get(
-        `/user/orders/${userData._id}?page=${page}&limit=${limit}`
-      );
-  
+      const response = await getUserOrdersAPI(userData._id, page, limit);
+      console.log("response data",response)
       setTotalPages(response.data.totalPages);
       setPage(response.data.currentPage);
-      setorders(response.data.orders);
+      setorders(response.data.orders); 
     } catch (err) {
       if (err.response) {
         console.log(err);
@@ -76,10 +75,7 @@ export default function OrdersComponent() {
       return;
     }
     try {
-      const response = await axiosInstance.put(
-        `/user/order/cancel/${orderId}/${itemId}`,
-        { cancelReason }
-      );
+      const response = await cancelOrderItemAPI(orderId, itemId, reason);
       setIsOpen(false);
       setCancelReason("");
       setreload(true);
@@ -129,12 +125,12 @@ export default function OrdersComponent() {
         try {
          
           //register return req
-          const response = await axiosInstance.post("/user/return/request", {
-            reason,
-            explanation,
-            orderId,
-            itemId,
-          });
+          const response = await requestReturnAPI({
+      reason,
+      explanation,
+      orderId,
+      itemId,
+    });
           toast.success(response.data.message);
           setreload(true);
           setIsOpenReturn(false);
@@ -151,7 +147,7 @@ export default function OrdersComponent() {
 
   async function handleContinuePayment(orderId){
       try{
-        const response = await axiosInstance.patch("/user/finishPayment",{orderId})
+        const response = await finishPaymentAPI(orderId);
         toast.success(response.data.message);
         setreload(true);
       }catch(err){

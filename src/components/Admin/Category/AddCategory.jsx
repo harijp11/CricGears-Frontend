@@ -7,6 +7,7 @@ import { toast,Toaster } from "sonner";
 import axiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
 import {validateCategory} from "../../../util/categoryValidation"
+import { addCategoryAPI } from "../../../services/categoryService";
 
 
 export default function AddCategory(){
@@ -27,10 +28,7 @@ export default function AddCategory(){
           }
          
          try {
-            const response = await axiosInstance.post("/admin/addCategories", {
-              name: cname,
-              description,
-            });
+            const response = await addCategoryAPI({ name: cname, description });
             toast.success(response.data.message)
            setTimeout(() => {
             navigate("/admin/viewcategory"); 

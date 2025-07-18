@@ -39,6 +39,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../ui/breadcrumb";
+import { fetchAdminOrdersAPI } from "../../../services/orderService";
 
 export default function AdminOrdersComponent() {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,9 +66,7 @@ export default function AdminOrdersComponent() {
 
   async function fetchOrders() {
     try {
-      const response = await axiosInstance.get(
-        `/admin/orders?page=${page}&limit=${limit}`
-      );
+      const response = await fetchAdminOrdersAPI({ page, limit });
       setTotalPages(response.data.totalPages);
       setPage(response.data.currentPage);
       setOrders(response.data.orders);

@@ -5,7 +5,7 @@ import Pagination from "../../shared/Pagination";
 import { Button } from "../../ui/button";
 import ProductCard from "./ProductCard";
 import { useNavigate } from "react-router-dom";
-import { fetchProdOfferApi } from "../../../APIs/OffersApi";
+import { fetchProdOfferApi } from "../../../services/OffersApi";
 import { FolderX, PlusCircle } from 'lucide-react';
 import {
   Table,
@@ -14,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
+import { adminFetchProducts } from "../../../services/productsService";
+import { getAdminCategories } from "../../../services/categoryService";
 
 export default function ProductList() {
   const navigate = useNavigate();
@@ -23,14 +25,14 @@ export default function ProductList() {
   const [reload, setReload] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const limit = 10;
+  const limit = 5;
 
   async function fetchProducts() {
     try {
-      const response = await axiosInstance.get(`/admin/fetchProducts?page=${page}&limit=${limit}`);
+      const response = await adminFetchProducts(page, limit);
       setTotalPages(response.data.totalPages);
       setPage(response.data?.currentPage);
-      const res = await axiosInstance.get("/admin/sendCategory");
+      const res = await getAdminCategories()
       setCategories(res.data.categories);
       setProducts(response.data.products);
       if (reload) setReload(false);
@@ -53,7 +55,7 @@ export default function ProductList() {
   useEffect(() => {
     fetchProdOffer();
     fetchProducts();
-  }, [page, reload]);
+  }, [page]);
 
   return (
     <div className="container mx-auto py-8">
@@ -93,6 +95,7 @@ export default function ProductList() {
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}
+                    setProducts = {setProducts}
                     product={product}
                     offers={offers}
                     categories={categories}

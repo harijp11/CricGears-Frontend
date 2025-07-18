@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toast } from "sonner";
+import { resetPassword } from "../../services/authService";
 
 export default function  ResetPassword(){
     const [newPassword, setNewPassword] = useState("");
@@ -67,11 +68,10 @@ export default function  ResetPassword(){
         }
 
         try{
-           const response = await axiosInstance.post(`/user/resetpassword`, {
+           const response = await resetPassword(id,
             newPassword,
             confirmPassword,
-            _id:id,
-           })
+           )
            navigate("/login")
            return toast.success(response.data.message);
         }catch(err){

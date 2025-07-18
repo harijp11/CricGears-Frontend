@@ -13,6 +13,7 @@ import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import { validateSignupForm } from "../../util/signUpValidation";
 import ReferalPop from "./ReferalPop";
+import { googleAuth } from "../../services/authService";
 
 export function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -263,9 +264,7 @@ export function SignUp() {
                   setGoogleData(decodeData);
                   // console.log("googlelogin==>", decodeData)
 
-                  const response = await axiosInstance.post("/user/googleAuth", {
-                    token: credentialResponse.credential
-                  });
+                  const response = await googleAuth(credentialResponse.credential);
 
                   if (response.data.success) {
                     // Check if it's a Google user

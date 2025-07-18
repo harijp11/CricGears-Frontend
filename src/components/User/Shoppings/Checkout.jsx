@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Address from "../profile/userAddress";
-import axiosInstance from "../../../AxiosInstance";
 import { useSelector } from "react-redux";
 import visa from "../../../assets/visa.png";
 import master from "../../../assets/master.png";
@@ -37,8 +36,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import PaymentComponent from "../../../util/paymentComponent";
 import ConfirmationModal from "../../shared/confirmationModal";
-import { applyCouponApi, updateCouponDataApi } from "../../../APIs/coupon";
-import { fetchWalletInfoApi } from "../../../APIs/wallet";
+import { applyCouponApi, updateCouponDataApi } from "../../../services/coupon";
+import { fetchWalletInfoApi } from "../../../services/wallet";
+import { fetchCartItemsAPI } from "../../../services/cartService";
+import { checkProductAvailabilityAPI } from "../../../services/productsService";
+import { placeOrderAPI } from "../../../services/orderService";
 
 export default function Checkout() {
   const userData = useSelector((store) => store.user.userDatas);
@@ -79,7 +81,7 @@ export default function Checkout() {
 
   async function fetchCartItems() {
     try {
-      const response = await axiosInstance.get(`/user/fetchCart/${userData._id}`);
+      const response = await fetchCartItemsAPI(userData._id);
       setCartItems(response.data.cartItems.items);
       setCart_id(response.data.cartItems._id);
       settotal_amount(response.data.cartItems.totalCartPrice);
@@ -115,13 +117,13 @@ export default function Checkout() {
         return toast.warn("Select a Payment method before proceeding");
       }
   
-      const cartResponse = await axiosInstance.get(`/user/fetchCart/${userData._id}`);
+      const cartResponse = await fetchCartItemsAPI(userData._id);
       const latestCartItems = cartResponse.data.cartItems.items;
       const latestTotalAmount = cartResponse.data.cartItems.totalCartPrice;
       
       if (JSON.stringify(latestCartItems) !== JSON.stringify(cartItems) || 
           latestTotalAmount !== total_amount) {
-        toast.warning("Cart data has changed. Please review your order.");
+        toast.warning("Item has been changed. Please check data order.");
         setCartItems(latestCartItems);
         settotal_amount(latestTotalAmount);
        
@@ -134,9 +136,7 @@ export default function Checkout() {
         payment_status = "Pending";
       }
   
-      const response = await axiosInstance.post("/user/product/available", {
-        cartItems: latestCartItems, // Use latest cart items
-      });
+      const response = await checkProductAvailabilityAPI(latestCartItems);
   
       if (!response.data.success) {
         return toast.error(response.data.message);
@@ -167,19 +167,21 @@ export default function Checkout() {
       });
       setDeliveryDate(formattedDate);
   
-      const res = await axiosInstance.post("/user/order", {
-        user: userData._id,
-        cartItems: latestCartItems, // Use latest cart items
-        total_amount: latestTotalAmount, // Use latest total amount
-        total_discount,
-        coupon_discount: coupon_Discount,
-        total_price_with_discount,
-        shipping_address: selectedAddress,
-        payment_method: selectedPaymentMethod,
-        payment_status,
-        cart_id,
-        deliveryDate: formattedDate,
-      });
+      const orderPayload = {
+      user: userData._id,
+      cartItems: latestCartItems,
+      total_amount: latestTotalAmount,
+      total_discount,
+      coupon_discount: coupon_Discount,
+      total_price_with_discount,
+      shipping_address: selectedAddress,
+      payment_method: selectedPaymentMethod,
+      payment_status,
+      cart_id,
+      deliveryDate: formattedDate,
+    };
+
+    const res = await placeOrderAPI(orderPayload);
   
       setOrderDetails(res?.data?.order);
   

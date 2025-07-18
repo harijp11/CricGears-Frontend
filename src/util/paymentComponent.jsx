@@ -55,7 +55,10 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
 
     try {
       const isAvailable = await checkProductAvailability();
-      if (!isAvailable) return;
+      if (!isAvailable) {
+        toast.warning("Product is not available.")
+        return;
+      }
 
       setPaymentInProgress(true);
 

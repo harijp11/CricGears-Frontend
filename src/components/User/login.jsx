@@ -4,14 +4,13 @@ import { jwtDecode } from "jwt-decode";
 import { Input } from "../ui/Input";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "../ui/button";
-
-import axiosInstance from "../../AxiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import { useDispatch, useSelector } from "react-redux";
 // import { toast as reactToast, ToastContainer } from 'sonner';
 import { toast, Toaster } from "sonner";
 import { addUser } from "../../redux/Slice/UserSlice";
+import { googleAuth, loginUser } from "../../services/authService";
 
 export function Login() {
   const dispatch = useDispatch();
@@ -25,10 +24,9 @@ export function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post("/user/login", {
+      const response = await loginUser(
         email,
-        password,
-      });
+        password);
       dispatch(addUser(response.data.userData));
       navigate("/");
       return toast.success(response.data.message);
@@ -186,12 +184,7 @@ export function Login() {
                     const decodeData = jwtDecode(credentialResponse.credential);
                     setGoogleData(decodeData);
 
-                    const response = await axiosInstance.post(
-                      "/user/googleAuth",
-                      {
-                        token: credentialResponse.credential,
-                      }
-                    );
+                    const response = await googleAuth(credentialResponse.credential);
 
                     if (response.data.success) {
                       // Check if it's a Google user

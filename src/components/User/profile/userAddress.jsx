@@ -14,6 +14,7 @@ import {
 import { Button } from "../../ui/button";
 import { validateAddressForm } from "../../../util/addressValidation";
 import PropTypes from "prop-types";
+import { addUserAddressAPI, deleteUserAddressAPI, editUserAddressAPI, getUserAddressesAPI } from "../../../services/addressService";
 
 export default function Address({ selectedAddress, setSelectedAddress }) {
   const userData = useSelector((store) => store.user.userDatas);
@@ -22,7 +23,7 @@ export default function Address({ selectedAddress, setSelectedAddress }) {
 
   async function fetchAddress() {
     try {
-      const response = await axiosInstance.get(`/user/address/${userData._id}`);
+      const response = await getUserAddressesAPI(userData._id);
       setSelectedAddress(response.data.address[0]);
       // console.log("setselectedaddresss==>", selectedAddress);
 
@@ -89,10 +90,7 @@ export default function Address({ selectedAddress, setSelectedAddress }) {
         state,
       };
 
-      const response = await axiosInstance.post("/user/address", {
-        newAddress,
-        userId: userData._id,
-      });
+      const response = await addUserAddressAPI(userData._id, newAddress);
 
       resetForm();
       setIsAdding(false);
@@ -143,10 +141,7 @@ export default function Address({ selectedAddress, setSelectedAddress }) {
         state,
       };
 
-      const response = await axiosInstance.post("/user/address/edit", {
-        newAddress,
-        userId: userData._id,
-      });
+      const response = await editUserAddressAPI(userData._id, newAddress);
 
       // Reset form and state after successful update
       resetForm();
@@ -171,10 +166,7 @@ export default function Address({ selectedAddress, setSelectedAddress }) {
 
   async function handleDeleteAddress(address) {
     try {
-      const response = await axiosInstance.delete(
-        `/user/address/delete/${address._id}`,
-        {}
-      );
+      const response = await deleteUserAddressAPI(address._id);
       setReload(true);
       return toast.success(response.data.message);
     } catch (err) {

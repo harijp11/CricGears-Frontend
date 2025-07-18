@@ -1,4 +1,4 @@
-import { findProductAndCategoryOfferApi } from "../APIs/OffersApi";
+import { findProductAndCategoryOfferApi } from "../services/OffersApi";
 
 export async function CalculateOfferPrice({
   product_id,

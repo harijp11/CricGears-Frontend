@@ -4,13 +4,13 @@ import { Input } from "../ui/Input";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { toast,Toaster } from "sonner";
-import axiosInstace from "../../AxiosInstance"
+
 import { Link, useNavigate } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { addAdmin } from "../../redux/Slice/AdminSlice";
-import store from "../../redux/Store";
-import loginImg from "../../assets/picsart_version-rGc4ycOkG-transformed.jpeg"
+import { adminLoginAPI } from "../../services/authService";
+
 
 
 function Login() {
@@ -24,9 +24,7 @@ function Login() {
    const handleLogin=async(e)=>{
     e.preventDefault();
     try{      
-      const response = await axiosInstace.post("/admin/login",{
-        email,password
-      })
+      const response = await adminLoginAPI({ email, password });
       // console.log(response);
       dispatch(addAdmin(response.data.adminData))
       navigate("/admin/home")

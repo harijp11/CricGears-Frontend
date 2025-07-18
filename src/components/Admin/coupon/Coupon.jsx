@@ -20,7 +20,7 @@ import {
 } from "../../ui/breadcrumb";
 
 import { useNavigate } from "react-router-dom";
-import { deleteCouponApi, FetchCouponsApi } from "../../../APIs/coupon";
+import { deleteCouponApi,FetchCouponsApi } from "../../../services/coupon";
 import ConfirmationModal from "../../shared/confirmationModal";
 import { toast } from "sonner";
 

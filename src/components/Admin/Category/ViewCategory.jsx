@@ -14,13 +14,14 @@ import axiosInstance from "../../../AxiosInstance";
 // import { Switch } from "../../ui/switch";
 import { toast, Toaster } from "sonner";
 import Pagination from "../../shared/Pagination";
-import { fetchCatApi,removeOffer } from "../../../APIs/OffersApi";
+import { fetchCatApi,removeOffer } from "../../../services/OffersApi";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
+import { fetchPaginatedCategoriesAPI, toggleCategoryStatusAPI } from "../../../services/categoryService";
 
 export default function Category() {
   const [categories, setCategories] = useState([]);
@@ -37,9 +38,7 @@ export default function Category() {
 
   const fetchData = async () => {
     try {
-      const response = await axiosInstance.get(
-        `/admin/fetchCategories?page=${page}&limit=${limit}`
-      );
+      const response = await fetchPaginatedCategoriesAPI({ page, limit });
       setTotalPages(response.data.totalPages);
       setCategories(response.data.categories);
       // console.log("kkkkkkkkkkkkkkkkkkkkkkkk",response.data)
@@ -57,10 +56,17 @@ export default function Category() {
   async function handleToggle(_id, isActive) {
     try {
       setToggle(!toggle);
-      const response = await axiosInstance.put("/admin/toggleCategories", {
-        _id,
-        isActive,
-      });
+      const response = await toggleCategoryStatusAPI({ _id, isActive });
+       if (response.data.success) {
+
+      const updatedStatus = response.data.updatedCategory?.isActive ?? !isActive;
+
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat._id === _id ? { ...cat, isActive: updatedStatus } : cat
+        )
+      );
+    }
       toast.success(response.data.message);
     } catch (err) {
       if (err.response && err.response.status === 400) {
@@ -76,7 +82,6 @@ export default function Category() {
       setOffer(response.data.categoryoffer);
     } catch (err) {
       console.log(err);
-     
     }
   }
 
@@ -97,10 +102,9 @@ export default function Category() {
 
   useEffect(() => {
     fetchData();
-    setReload(false);
     fetchCatOffer();
-   
-  }, [toggle, page, reload]);
+    setReload(false);
+  }, [page,reload]);
 
   return (
     <>

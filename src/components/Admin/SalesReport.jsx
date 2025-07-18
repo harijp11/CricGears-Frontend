@@ -12,6 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+import { downloadSalesExcelAPI, downloadSalesPDFAPI, fetchSalesDataAPI } from "../../services/adminService";
 
 const SalesReport = () => {
   const [startDate, setStartDate] = useState("");
@@ -26,11 +27,7 @@ const SalesReport = () => {
 
   const handlePdfDownload = async () => {
     try {
-      const response = await axiosInstance.get("admin/sales/download/pdf", {
-        params: { filterType, startDate, endDate },
-        responseType: "blob",
-      });
-
+      const response = await downloadSalesPDFAPI({ filterType, startDate, endDate });
       const blob = new Blob([response.data], { type: "application/pdf" });
       saveAs(blob, "SalesReport.pdf");
     } catch (error) {
@@ -40,10 +37,7 @@ const SalesReport = () => {
 
   const handleExcelDownload = async () => {
     try {
-      const response = await axiosInstance.get("admin/sales/download/excel", {
-        params: { filterType, startDate, endDate },
-        responseType: "blob",
-      });
+      const response = await downloadSalesExcelAPI({ filterType, startDate, endDate });
 
       const blob = new Blob([response.data], { type: "application/xlsx" });
       saveAs(blob, "SalesReport.xlsx");
@@ -54,16 +48,13 @@ const SalesReport = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const response = await axiosInstance.get(
-        `/admin/sales?page=${page}&limit=${limit}`,
-        {
-          params: {
-            filterType,
-            startDate,
-            endDate,
-          },
-        }
-      );
+      const response = await fetchSalesDataAPI({
+        page,
+        limit,
+        filterType,
+        startDate,
+        endDate,
+      });
       const data = await response.data.orders;
       const totalsaleData = await response.data.totalSales;
 

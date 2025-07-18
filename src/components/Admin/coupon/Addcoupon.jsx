@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Tag, Calendar, Users, Save,ArrowLeft } from "lucide-react";
-import { AddCouponApi } from "../../../APIs/coupon";
+import { AddCouponApi } from "../../../services/coupon";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { validateCouponForm } from "../../../util/couponValidation";

@@ -28,6 +28,8 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { SiteHeader } from "../../ui/header";
 import { CalculateOfferPrice } from "../../../util/CalculateOfferPrice";
+import { fetchCartItemsAPI, incrementCartItemAPI, removeCartItemAPI } from "../../../services/cartService";
+import { decrementCartItemAPI } from "../../../services/authService";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -45,9 +47,7 @@ export default function Cart() {
 
   async function fetchCartItems() {
     try {
-      const response = await axiosInstance.get(
-        `/user/fetchCart/${userData._id}`
-      );   
+      const response = await fetchCartItemsAPI(userData._id)
       setCartItems(response.data.cartItems.items);
       setSubtota(response.data.cartItems.totalCartPrice);
     } catch (err) {
@@ -65,8 +65,7 @@ export default function Cart() {
 
   async function handlePlus(item){
     try{
-        const response= await axiosInstance.patch(`/user/cart/plus/${item._id}/${userData._id}`)
-        // console.log(response.data.message);
+        const response= await incrementCartItemAPI(item._id, userData._id);
         setReload(true);
         if(response.data.success=== false){
             toast.info(response.data.message)
@@ -81,7 +80,7 @@ export default function Cart() {
 
     async function handleMinus(item){
         try{
-           const response= await axiosInstance.patch(`/user/cart/minus/${item._id}/${userData._id}`)
+           const response= await decrementCartItemAPI(item._id, userData._id);
            setReload(true)
         //    toast.success(response.data.message)
         // console.log(response.data.message);
@@ -93,7 +92,7 @@ export default function Cart() {
 
     async function handleRemove(item){
         try{
-           const response= await axiosInstance.delete(`/user/cart/remove/${item._id}/${userData._id}`)
+           const response= await removeCartItemAPI(item._id, userData._id);
            setReload(true)
           //  console.log(response.data.message);
            return toast.warning(response.data.message);

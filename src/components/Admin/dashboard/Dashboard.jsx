@@ -18,6 +18,7 @@ import {
   IndianRupee,
 } from "lucide-react";
 import axiosInstance from "../../../AxiosInstance";
+import { fetchAdminDashboardAPI } from "../../../services/adminService";
 
 export function DashboardContent() {
 
@@ -46,11 +47,7 @@ export function DashboardContent() {
 
   async function fetchChartData(){
     try{
-         const response = await axiosInstance.get("/admin/dashboard",{
-          params:{timeFilter}
-         })
-
-          // console.log("%%%%%%%%%%",response.data)
+         const response = await fetchAdminDashboardAPI(timeFilter);
           
          setTotalCustomers(response.data.TotalCustomers || 0)
          setTotalSales(response.data.totalSales|| 0)

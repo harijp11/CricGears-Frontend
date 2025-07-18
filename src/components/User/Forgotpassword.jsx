@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { OTPVerification } from "./OTPverification";
 import {ArrowLeft} from "lucide-react"
 import { toast } from "sonner";
+import { forgotPassword,verifyForgotPasswordOtp  } from "../../services/authService";
 
 
 export default function ForgotPassword(){
@@ -14,8 +15,7 @@ export default function ForgotPassword(){
 
     const sendOtp=async()=>{
       try{
-        toast.success("Genarating OTP please wait...")
-        const response = await axiosInstance.post("/user/forgotPassword", {email})
+        const response = await forgotPassword(email)
         toast.success(response.data.message)
         setIsOTPDialogOpen(true)
         // console.log(response.data.otp); 
@@ -41,9 +41,7 @@ export default function ForgotPassword(){
 
    const handleVerify=async(otp)=>{
    try{
-    const response=await axiosInstance.post("/user/forgotPassword/Otpverify",{
-        email,otp
-    }) 
+    const response=await verifyForgotPasswordOtp(email,otp) 
     const _id = response.data._id
     toast.success(response.data.message)
       setTimeout(()=> navigate(`/resetpassword/${_id}`))
@@ -55,7 +53,6 @@ export default function ForgotPassword(){
       }
     //   toast.error("An error occurred. Please try again.");
     console.log(err);
-    
     }
     setIsOTPDialogOpen(false);
    }

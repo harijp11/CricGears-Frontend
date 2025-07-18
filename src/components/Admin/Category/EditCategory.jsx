@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import {Input} from "../../ui/Input"
 import { Textarea } from "../../ui/textarea";
-import { ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import axiosInstance from "../../../AxiosInstance";
 import { toast,Toaster } from "sonner";
 import { validateCategory } from "../../../util/editCategoryValidation";
+import { editCategoryAPI, getCategoryByIdAPI } from "../../../services/categoryService";
 
 
 export default function EditCategory() {
@@ -21,7 +20,7 @@ export default function EditCategory() {
     useEffect(()=>{
         async function fetchCategoryData(){
             try{
-                const response = await axiosInstance.get(`/admin/getCategory/${id}`);
+                const response = await getCategoryByIdAPI(id);
                 const {name,description}=response.data.categoryData
                 setExistingCategory(response.data.categoryData)
                 setName(name)
@@ -45,11 +44,7 @@ export default function EditCategory() {
           return;
       }
             try{
-                const response = await axiosInstance.put("/admin/editCategory",{
-                    id,
-                    name,
-                    description,
-                })
+                const response = await editCategoryAPI({ id, name, description });
                 toast.success(response.data.message)
                setTimeout(() => {
                 navigate("/admin/viewcategory")

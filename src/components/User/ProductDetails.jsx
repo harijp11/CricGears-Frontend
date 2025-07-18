@@ -3,8 +3,6 @@ import { Heart, Minus, Plus, Slash, Star, X, Package } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/Caard";
 import "../../App.css";
-import { AnimatePresence, motion } from "framer-motion";
-import axiosInstance from "../../AxiosInstance";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +10,10 @@ import PropTypes from "prop-types";
 import { CalculateOfferPrice } from "../../util/CalculateOfferPrice";
 import { addToWishListApi,
   checkIsExistOnWishlistApi,
-  removeFromWishListApi } from "../../APIs/wishlistApi";
+  removeFromWishListApi
+ } from "../../services/wishlistApi";
+import { addToCart } from "../../services/cartService";
+import { getProductSizeForUser } from "../../services/productsService";
 
 export default function ProductDetails({ product }) {
   const navigate = useNavigate();
@@ -75,9 +76,7 @@ export default function ProductDetails({ product }) {
       }
       setSize(s);
       setError("");
-      const response = await axiosInstance.get(
-        `/user/size/${product._id}/${userData._id}/${s.size}`
-      );
+      const response = await getProductSizeForUser(product._id, userData._id, s.size);
       setExist(response.data.success);
       toast.success(response.data.message);
     } catch (err) {
@@ -152,10 +151,7 @@ async function checkisExistInWishlist(){
           discountedAmount:offerPrice,
           qty: 1,
         };
-        const response = await axiosInstance.post("/user/addToCart", {
-          userId: userData._id,
-          product: productData,
-        });
+        const response = addToCart(userData._id, productData);
         setExist(true);
         if (response && response.data && response.data.message) {
           toast.success(response.data.message);

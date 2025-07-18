@@ -16,6 +16,7 @@ import {
   BreadcrumbSeparator,
 } from "../../ui/breadcrumb";
 import UserReferral from "./ReferAndEarn";
+import { updateUserProfileAPI } from "../../../services/authService";
 
 function Myprofile() {
   const dispatch = useDispatch();
@@ -43,12 +44,12 @@ function Myprofile() {
     }
 
     try {
-      const response = await axiosInstance.put("/user/editUser", {
-        userId: userData._id,
-        email: userData.email,
-        name,
-        phone,
-      });
+      const response = await updateUserProfileAPI({
+      userId: userData._id,
+      email: userData.email,
+      name,
+      phone,
+    });
       dispatch(addUser(response.data.user));
       setIsEditing(false);
       toast.success("Profile Updated Successfully");

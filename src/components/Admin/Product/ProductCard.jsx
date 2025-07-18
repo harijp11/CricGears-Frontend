@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import axiosInstance from "../../../AxiosInstance";
 import { useNavigate } from "react-router-dom";
-import { removeOffer } from "../../../APIs/OffersApi";
+import { removeOffer } from "../../../services/OffersApi";
 import { Switch } from "../../ui/switch";
 import { Button } from "../../ui/button";
 import { TableCell, TableRow } from "../../ui/table";
 import { Edit, PlusCircle, Trash } from "lucide-react";
 import EditProductPop from "./EditProduct";
+import { toggleProductStatus } from "../../../services/productsService";
 
-function ProductCard({ product, categories, setReload, offers }) {
+function ProductCard({setProducts, product, categories, setReload, offers }) {
   const [currentOffer, setCurrentOffer] = useState(null);
   const [displayOffer, setDisplayOffer] = useState(null);
   const navigate = useNavigate();
@@ -39,16 +40,22 @@ function ProductCard({ product, categories, setReload, offers }) {
           : categoryOffer
           ? categoryOffer
           : null
-      );
+      ); 
     }
-  }, [product._id, product.catOfferval, offers]);
+  }, [
+    product._id, product.catOfferval, offers
+  ]);
 
   async function handleToggle(_id, isActive) {
     try {
-      const response = await axiosInstance.put("/admin/productStatus", {
-        _id,
-        isActive: !isActive,
-      });
+      const response = await toggleProductStatus(_id, isActive);
+      if(response.data.success){
+        setProducts((prev)=>
+         prev.map((pro) =>
+          pro._id === _id ? { ...pro, isActive: !pro.isActive } : pro
+        )
+        )
+      }
       toast.success(response.data.message);
       setReload(true);
     } catch (err) {

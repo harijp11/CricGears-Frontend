@@ -3,7 +3,7 @@ import { Sidebar } from '../../components/Admin/dashboard/Sidebar';
 import { DashboardContent } from '../../components/Admin/dashboard/Dashboard';
 import { Menu,ArrowLeft } from 'lucide-react';
 
-export function AdminDashboard() {
+export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);

@@ -3,7 +3,7 @@ import {
   fetchWishlistApi,
   moveItemtoCartApi,
   removeFromWishListApi,
-} from "../../../APIs/wishlistApi";
+} from "../../../services/wishlistApi";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -23,6 +23,7 @@ import React, { useEffect, useState,useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { addToCart } from "../../../services/cartService";
 
 export default function Wishlist() {
   const userData = useSelector((store) => store.user.userDatas);
@@ -70,10 +71,8 @@ export default function Wishlist() {
         return setIsOpen(true);
       }
 
-      const response = await axiosInstance.post("/user/addToCart", {
-        userId: userData._id,
-        product: productData,
-      });
+      const response = await addToCart(userData._id,
+       productData);
         removeFromWishlist(product._id);
       if (selectRefs.current[product._id]) {
         selectRefs.current[product._id].value = "";

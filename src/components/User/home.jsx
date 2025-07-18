@@ -6,6 +6,7 @@ import ProductCard from "../ui/ProductCard";
 import { Star, Truck, Shield } from 'lucide-react';
 import axiosInstance from "../../AxiosInstance";
 import Homeimg from "../../assets/picsart_version-rGc4ycOkG-transformed.jpeg";
+import { fetchProducts } from "../../services/productsService";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchNewArrivals() {
       try {
-        const response = await axiosInstance.get("/user/fetchProducts", {});
+        const response =  await fetchProducts();
         setProducts(response.data.productData);
       } catch (err) {
         console.error("Error fetching products:", err);

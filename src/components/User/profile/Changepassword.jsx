@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/Input";
-import { AlertCircle, Eye, EyeOff,ArrowLeft } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import ConfirmationModal from "../../shared/confirmationModal";
 import axiosInstance from "../../../AxiosInstance";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { validatePassword } from "../../../util/ChangepasswordValidation";
+import { changeUserPasswordAPI } from "../../../services/authService";
 
 export default function ChangePassword() {
   const userData = useSelector((store) => store.user.userDatas);
@@ -29,7 +30,6 @@ export default function ChangePassword() {
     message: "",
     onConfirm: null,
   });
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,12 +48,11 @@ export default function ChangePassword() {
       message: "Are you sure you want to Change to this new password?",
       onConfirm: async () => {
         try {
-          const _Id = userData._id;
-          const response = await axiosInstance.post("/user/changePassword", {
+          const response = await changeUserPasswordAPI({
             currentPassword,
             newPassword,
             confirmPassword,
-            _Id,
+            _Id: userData._id,
           });
           resetform();
           toast.success(response.data.message);
@@ -77,15 +76,15 @@ export default function ChangePassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-   <div class="fixed left-3 top-3">
-          <button
-            onClick={() => navigate("/viewprofile")}
-            className="absolute left-0 top-0 flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="h-5 w-5 mr-1" />
-            Back
-          </button>
-          </div>
+      <div class="fixed left-3 top-3">
+        <button
+          onClick={() => navigate("/viewprofile")}
+          className="absolute left-0 top-0 flex items-center text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="h-5 w-5 mr-1" />
+          Back
+        </button>
+      </div>
       <ConfirmationModal
         isOpen={isOpen}
         onOpenChange={setIsOpen}
@@ -94,7 +93,6 @@ export default function ChangePassword() {
         onConfirm={modalContent.onConfirm}
       />
       <div className="max-w-md w-full space-y-8">
-        
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Change Password
@@ -113,9 +111,7 @@ export default function ChangePassword() {
                 Attention needed
               </h3>
               <div className="mt-2 text-sm text-yellow-700">
-                <p>
-                Choose a strong password to keep your account secure!
-                </p>
+                <p>Choose a strong password to keep your account secure!</p>
               </div>
             </div>
           </div>
