@@ -88,6 +88,7 @@ export default function OrdersComponent() {
       console.log(err);
     }
   };
+
   const handleCancel = () => {
     setModalContent({
       title: "Cancel Order",
