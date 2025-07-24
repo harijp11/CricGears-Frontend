@@ -75,7 +75,7 @@ export default function OrdersComponent() {
       return;
     }
     try {
-      const response = await cancelOrderItemAPI(orderId, itemId, reason);
+      const response = await cancelOrderItemAPI(orderId, itemId, cancelReason);
       setIsOpen(false);
       setCancelReason("");
       setreload(true);
