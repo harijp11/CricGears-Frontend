@@ -118,17 +118,19 @@ export default function Checkout() {
       }
   
       const cartResponse = await fetchCartItemsAPI(userData._id);
+
       const latestCartItems = cartResponse.data.cartItems.items;
+      
       const latestTotalAmount = cartResponse.data.cartItems.totalCartPrice;
       
-      if (JSON.stringify(latestCartItems) !== JSON.stringify(cartItems) || 
-          latestTotalAmount !== total_amount) {
-        toast.warning("Item has been changed. Please check data order.");
-        setCartItems(latestCartItems);
-        settotal_amount(latestTotalAmount);
+      // if (JSON.stringify(latestCartItems) !== JSON.stringify(cartItems) || 
+      //     latestTotalAmount !== total_amount) {
+      //   toast.warning("Item has been changed. Please check data order.");
+      //   setCartItems(latestCartItems);
+      //   settotal_amount(latestTotalAmount);
        
-        return false;
-      }
+      //   return false;
+      // }
   
       if (selectedPaymentMethod == "wallet") {
         payment_status = "Paid";

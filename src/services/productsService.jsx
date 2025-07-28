@@ -78,3 +78,14 @@ export const toggleProductStatus = async (_id, isActive) => {
 export const adminFetchProducts = async (page, limit) => {
   return await axiosInstance.get(`/admin/fetchProducts?page=${page}&limit=${limit}`);
 };
+
+export const lockAllItems = async (cartItems) => {
+  return await axiosInstance.post("/user/product/lock-item", { cartItems });
+};
+
+
+export const unlockItems = async (cartItems) => {
+  return await axiosInstance.post("/user/product/unlock-items", {
+    cartItems,
+  });
+};

@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Star } from 'lucide-react';
+import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-// import axiosInstance from "@/AxiosConfig";
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const [stars, setStars] = useState(0);
   const {
+    _id,
     name,
     price,
     salePrice,
+    discountedAmount,
     rating,
     category,
     isActive,
@@ -17,10 +18,20 @@ export default function ProductCard({ product }) {
     totalStock,
   } = product;
 
+  // Calculate the current price
+  const hasDiscount = discountedAmount && discountedAmount > 0;
+  const currentPrice = hasDiscount ? price - discountedAmount : price;
+  // Set stars based on rating (assuming rating is a number, e.g., 4.5)
+  useEffect(() => {
+    if (rating) {
+      setStars(Math.round(rating));
+    }
+  }, [rating]);
+
   return (
     <div
       onClick={() => {
-        navigate(`/product/${product._id}`);
+        navigate(`/product/${_id}`);
         window.scrollTo({
           top: 0,
           behavior: "smooth",
@@ -40,29 +51,34 @@ export default function ProductCard({ product }) {
           </div>
         )}
       </div>
-      <div className="p-4"> 
+      <div className="p-4">
         <h3 className="text-lg font-semibold mb-2 truncate">{name}</h3>
         <div className="flex justify-between items-center mb-2">
-          <p className="font-bold text-lg text-primary">Rs.{salePrice.toFixed(2)}</p>
-          <p className="text-sm text-gray-500"><del>Rs.{price}</del></p>
+          <p className="font-bold text-lg text-primary">
+            Rs.{currentPrice.toFixed(2)}
+          </p>
+          {hasDiscount && (
+            <p className="text-sm text-gray-500">
+              <del>Rs.{price.toFixed(2)}</del>
+            </p>
+          )}
         </div>
         <div className="flex items-center mb-2">
-          {[...Array(stars)].map((_, index) => (
+          {[...Array(5)].map((_, index) => (
             <Star
               key={index}
-              className="w-4 h-4 text-yellow-400 fill-current"
+              className={`w-4 h-4 ${
+                index < stars ? "text-yellow-400 fill-current" : "text-gray-300"
+              }`}
             />
           ))}
-          <span className="text-yellow-400 ml-1 text-sm">
-            ★★★★★
-          </span>
+          <span className="text-sm text-gray-600 ml-1">({rating || 0})</span>
         </div>
         <div className="text-sm text-gray-600">
-          <span>{category?.name}</span>
-          <span>{isActive}</span>
+          <span>{category?.name || "Unknown Category"}</span>
+          {/* Remove isActive as it's not user-facing */}
         </div>
-      </div> 
+      </div>
     </div>
   );
 }
-

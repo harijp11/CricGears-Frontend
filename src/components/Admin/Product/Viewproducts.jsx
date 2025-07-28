@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import axiosInstance from "../../../AxiosInstance";
 import Pagination from "../../shared/Pagination";
 import { Button } from "../../ui/button";
 import ProductCard from "./ProductCard";
@@ -55,7 +54,7 @@ export default function ProductList() {
   useEffect(() => {
     fetchProdOffer();
     fetchProducts();
-  }, [page]);
+  }, [page,reload]);
 
   return (
     <div className="container mx-auto py-8">

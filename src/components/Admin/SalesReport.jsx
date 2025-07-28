@@ -191,7 +191,7 @@ const SalesReport = () => {
                           : ""}
                       </td>
                       <td className="py-3 px-6 text-left">
-                        {item.product.name}
+                        {item?.product?.name || ""}
                       </td>
                       <td className="py-3 px-6 text-left">{item.qty}</td>
                       <td className="py-3 px-6 text-left">

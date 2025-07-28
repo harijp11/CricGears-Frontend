@@ -57,7 +57,7 @@ function ProductCard({setProducts, product, categories, setReload, offers }) {
         )
       }
       toast.success(response.data.message);
-      setReload(true);
+      // setReload(true);
     } catch (err) {
       if (err.response && err.response.status === 400) {
         return toast.error(err.response.data.message);

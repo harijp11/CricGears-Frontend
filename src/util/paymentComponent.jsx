@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../AxiosInstance";
+import { lockAllItems, unlockItems } from "../services/productsService";
 
 function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
   const navigate = useNavigate();
@@ -9,11 +10,13 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
   const [paymentInProgress, setPaymentInProgress] = useState(false);
 
   useEffect(() => {
-    const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
-    
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+
     if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.async = true;
       script.onload = () => setIsScriptLoaded(true);
       script.onerror = () => {
@@ -34,7 +37,9 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
 
   const checkProductAvailability = async () => {
     try {
-      const res = await axiosInstance.post("/user/product/available", { cartItems });
+      const res = await axiosInstance.post("/user/product/available", {
+        cartItems,
+      });
       if (!res.data.success) {
         toast.error(res.data.message);
         navigate("/checkout");
@@ -56,7 +61,14 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
     try {
       const isAvailable = await checkProductAvailability();
       if (!isAvailable) {
-        toast.warning("Product is not available.")
+        toast.warning("Product is not available.");
+        return;
+      }
+
+      const res = await lockAllItems(cartItems);
+      if (!res.data.success) {
+        console.log("lock response", res);
+        toast.error(res.message);
         return;
       }
 
@@ -68,7 +80,7 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
         currency: "INR",
         name: "CRICGEARS",
         description: "CRICGEARS E-COMMERCE PAYMENT",
-        handler: function(response) {
+        handler: function (response) {
           if (response.razorpay_payment_id) {
             handlePlaceOrder("Paid");
           } else {
@@ -80,29 +92,39 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
         prefill: {
           name: "Hari jp",
           email: "cricgears17@gmail.com",
-          contact: "7034019333"
+          contact: "7034019333",
         },
         theme: {
-          color: "#3399cc"
+          color: "#3399cc",
         },
         modal: {
-          ondismiss: function() {
-            setPaymentInProgress(false);
-            navigate("/checkout");
-            toast.info("Payment not completed");
-          }
-        }
+          ondismiss: async function () {
+            try {
+              setPaymentInProgress(false);
+              await unlockItems(cartItems);
+              toast.info("Payment not completed, items unlocked.");
+            } catch (error) {
+              console.error("Unlock failed:", error);
+              toast.error("Failed to unlock items");
+              navigate("/cart")
+            } finally {
+              navigate("/checkout");
+            }
+          },
+        },
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function(response) {
-       handlePlaceOrder("Failed")
+      rzp.on("payment.failed", function (response) {
+        handlePlaceOrder("Failed");
         navigate("/checkout");
       });
       rzp.open();
     } catch (error) {
       setPaymentInProgress(false);
-      toast.error("Payment initialization failed");
+      toast.error(error.response.data.message);
+      // toast.error("Payment initialization failed");
+      setTimeout(() => navigate("/cart"), 1500);
     }
   };
 
@@ -111,15 +133,16 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
       onClick={handleSubmit}
       disabled={!isScriptLoaded || paymentInProgress}
       className={`bg-black text-white mt-4 w-full h-16 rounded-md ${
-        !isScriptLoaded || paymentInProgress ? 'opacity-50 cursor-not-allowed' : ''
+        !isScriptLoaded || paymentInProgress
+          ? "opacity-50 cursor-not-allowed"
+          : ""
       }`}
     >
-      {!isScriptLoaded 
-        ? 'Loading Payment...' 
-        : paymentInProgress 
-          ? 'Processing Payment...' 
-          : 'Pay with RazorPay'
-      }
+      {!isScriptLoaded
+        ? "Loading Payment..."
+        : paymentInProgress
+        ? "Processing Payment..."
+        : "Pay with RazorPay"}
     </button>
   );
 }
