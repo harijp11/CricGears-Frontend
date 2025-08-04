@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../AxiosInstance";
 import { lockAllItems, unlockItems } from "../services/productsService";
@@ -8,6 +8,10 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
   const navigate = useNavigate();
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [paymentInProgress, setPaymentInProgress] = useState(false);
+  const [orderProcessed, setOrderProcessed] = useState(false);
+  
+  // Use useRef to ensure immediate synchronous updates
+  const orderProcessedRef = useRef(false);
 
   useEffect(() => {
     const existingScript = document.querySelector(
@@ -73,17 +77,23 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
       }
 
       setPaymentInProgress(true);
-
+      setOrderProcessed(false);
+      orderProcessedRef.current = false;
+      
       const options = {
         key: "rzp_test_fu3JZWbM4Hq2Jt",
-        amount: total * 100,
+        amount: Math.round(total * 100),
         currency: "INR",
         name: "CRICGEARS",
         description: "CRICGEARS E-COMMERCE PAYMENT",
         handler: function (response) {
+            if (orderProcessedRef.current) return;
+            orderProcessedRef.current = true;
+            setOrderProcessed(true); 
           if (response.razorpay_payment_id) {
             handlePlaceOrder("Paid");
-          } else {
+          } 
+          else {
             toast.error("Payment failed. Please try again.");
             navigate("/checkout");
           }
@@ -102,7 +112,7 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
             try {
               setPaymentInProgress(false);
               await unlockItems(cartItems);
-              toast.info("Payment not completed, items unlocked.");
+              toast.info("Payment cancelled, items unlocked.");
             } catch (error) {
               console.error("Unlock failed:", error);
               toast.error("Failed to unlock items");
@@ -115,10 +125,18 @@ function PaymentComponent({ total, handlePlaceOrder, cartItems }) {
       };
 
       const rzp = new window.Razorpay(options);
+      
       rzp.on("payment.failed", function (response) {
+          if (orderProcessedRef.current) return;        
+          orderProcessedRef.current = true;   
+          setOrderProcessed(true);   
+
         handlePlaceOrder("Failed");
+        setPaymentInProgress(false); 
+        rzp.close();  
         navigate("/checkout");
       });
+      
       rzp.open();
     } catch (error) {
       setPaymentInProgress(false);

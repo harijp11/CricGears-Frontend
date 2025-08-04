@@ -25,10 +25,10 @@ function ContinuePayment({ total, onSuccess }) {
     }
 
     try {
+      console.log("Amount in paise:", Math.round(total * 100));
       var options = {
         key: "rzp_test_fu3JZWbM4Hq2Jt",
-        // Remove key_secret from frontend code for security!
-        amount: total * 100,
+        amount: Math.round(total * 100),
         currency: "INR",
         name: "CricGears",
         description: "CricGears E-COMMERCE PAYMENT TESTING",
