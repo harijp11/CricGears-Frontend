@@ -54,7 +54,7 @@ export default function ProductList() {
   useEffect(() => {
     fetchProdOffer();
     fetchProducts();
-  }, [page,reload]);
+  }, [page,reload,]);
 
   return (
     <div className="container mx-auto py-8">

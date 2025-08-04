@@ -62,12 +62,12 @@ export function Sidebar({ isOpen, onClose }) {
             <span>Sales Report</span>
           </Link>
         </li>
-        <li>
+        {/* <li>
           <Link href="/admin/settings" className="flex items-center p-2 hover:bg-gray-700 rounded">
             <Settings className="h-4 w-4 mr-2" />
             <span>Settings</span>
           </Link>
-        </li>
+        </li> */}
         <li>
           <Link href="" className="flex items-center p-2 hover:bg-gray-700 rounded" onClick={()=>setIsPopupOpen(true)}>
             <LogOut className="h-4 w-4 mr-2" />

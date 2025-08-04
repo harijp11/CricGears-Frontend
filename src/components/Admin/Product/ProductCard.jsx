@@ -7,14 +7,14 @@ import { Switch } from "../../ui/switch";
 import { Button } from "../../ui/button";
 import { TableCell, TableRow } from "../../ui/table";
 import { Edit, PlusCircle, Trash } from "lucide-react";
-import EditProductPop from "./EditProduct";
+// import EditProductPop from "./EditProduct";
 import { toggleProductStatus } from "../../../services/productsService";
 
 function ProductCard({setProducts, product, categories, setReload, offers }) {
   const [currentOffer, setCurrentOffer] = useState(null);
   const [displayOffer, setDisplayOffer] = useState(null);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const productOffer = offers.find((offer) => offer.targetId === product._id);
 
@@ -156,11 +156,14 @@ function ProductCard({setProducts, product, categories, setReload, offers }) {
       </TableCell>
       <TableCell>
         <div className="flex items-center space-x-2">
-          <EditProductPop
-            product={product}
-            categories={categories}
-            setReload={setReload}
-          />
+         <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/admin/editProduct/${product._id}`)}
+          >
+            <Edit className="w-4 h-4 mr-1" />
+            Edit
+          </Button>
           <Switch
             checked={product.isActive}
             onCheckedChange={() => handleToggle(product._id, !product.isActive)}

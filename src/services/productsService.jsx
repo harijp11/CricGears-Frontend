@@ -10,6 +10,8 @@ export const fetchProducts = async () => {
 };
 
 
+
+
 export const getProductSizeForUser = async (productId, userId, size) => {
   try {
     const response = await axiosInstance.get(
@@ -61,6 +63,10 @@ export const checkProductAvailabilityAPI = async (cartItems) => {
 
 export const addProduct = async (productData) => {
   return await axiosInstance.post("/admin/addProduct", productData);
+};
+
+export const fetchProductById = async (productId) => {
+  return await axiosInstance.get(`/admin/product/${productId}`);
 };
 
 

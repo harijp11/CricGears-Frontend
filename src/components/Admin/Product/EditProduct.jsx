@@ -1,20 +1,9 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Button } from "../../ui/button";
-// import { getCroppedImg } from "../../../util/CropImage";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../ui/dialog";
-
 import { Input } from "../../ui/Input";
 import { Label } from "../../ui/label";
 import { Textarea } from "../../ui/textarea";
-import { Eye, Edit, Tag, Trash2, SquareMinus, Minus, X } from "lucide-react";
+import { Eye, Edit, Tag, Trash2, SquareMinus, Minus, X, ArrowLeft } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -24,40 +13,78 @@ import {
 } from "../../ui/select";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import axiosInstance from "../../../AxiosInstance";
 import { toast, Toaster } from "sonner";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { validateEditProduct } from "../../../util/EditProductvalidation";
-import { editProduct } from "../../../services/productsService";
+import { editProduct, fetchProductById } from "../../../services/productsService";
+import { getAdminCategories } from "../../../services/categoryService";
 
-function EditProductPop({ product, categories, setReload }) {
-  useEffect(() => {
-    //  console.log("------",categories)
-  }, []);
-
-  const [sizes, setSizes] = useState(product.sizes || []);
-
-  const [editName, setEditName] = useState(product.name);
-  const [editDescription, setEditDescription] = useState(product.description);
-  const [editCategory, setEditCategory] = useState(product.category._id);
-  const [editPrice, setEditPrice] = useState(product.price);
-  const [editSalePrice, setEditSalePrice] = useState(product.salePrice);
-  const [editSizes, setEditSizes] = useState(product.sizes);
-  const [editImages, setEditImages] = useState(product.images);
-
+function EditProduct() {
   const navigate = useNavigate();
+  const { productId } = useParams();
+  
+  const [product, setProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [sizes, setSizes] = useState([]);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editSalePrice, setEditSalePrice] = useState("");
+  const [editSizes, setEditSizes] = useState([]);
+  const [editImages, setEditImages] = useState([]);
+
   const [images, setImages] = useState([]);
   const [cropperInstances, setCropperInstances] = useState([]);
   const [croppedImages, setCroppedImages] = useState([]);
   const [error, setError] = useState({});
 
-  const [open, setOpen] = useState(false);
   const [cropperDimensions, setCropperDimensions] = useState({
     width: 300,
     height: 400,
   });
+
+  // Fetch product data and categories on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch product details
+        const productResponse = await fetchProductById(productId);
+        const productData = productResponse.data.product;
+        setProduct(productData);
+        
+        // Set form fields with product data
+        setEditName(productData.name);
+        setEditDescription(productData.description);
+        setEditCategory(productData.category);
+        setEditPrice(productData.price);
+        setEditSalePrice(productData.salePrice);
+        setSizes(productData.sizes || []);
+        setEditSizes(productData.sizes);
+        setEditImages(productData.images);
+        
+        // Fetch categories
+        const categoriesResponse = await getAdminCategories();
+        setCategories(categoriesResponse.data.categories);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load product data");
+        setLoading(false);
+      }
+    };
+
+    if (productId) {
+      fetchData();
+    }
+  }, [productId]);
 
   const handleImageUpload = (e, index) => {
     const file = e.target.files[0];
@@ -198,10 +225,9 @@ function EditProductPop({ product, categories, setReload }) {
         sizes: editSizes,
         images: imageEdit,
       });
-      setOpen(false);
-      setReload(true);
 
       toast.success(response.data.message);
+      navigate("/admin/viewproducts");
     } catch (err) {
       if (err.response && err.response.status === 404) {
         return toast.error(err.response.data.message);
@@ -225,312 +251,339 @@ function EditProductPop({ product, categories, setReload }) {
     setCroppedImages(updatedCroppedImages);
   }
 
-  return (
-    <>
-      <Toaster position="top-right" richColors />
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="flex gap-2" variant="outline" size="sm">
-            <Eye className="w-4 h-4 " />
-            Edit
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[1000px] w-full max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <DialogHeader>
-            <DialogTitle className="dark:text-white">
-              {product.name}
-            </DialogTitle>
-            <DialogDescription className="dark:text-white">
-              View and edit product details
-            </DialogDescription>
-          </DialogHeader>
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center h-[50vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading product...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-          {/* cropper */}
-          {images.map(
-            (image, index) =>
-              image && (
-                <div
-                  key={index}
-                  className="crop-container fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                >
-                  <div
-                    className="bg-white p-4 rounded-lg shadow-lg flex flex-col"
-                    style={{
-                      width: cropperDimensions.width,
-                      height: cropperDimensions.height,
+  if (!product) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center h-[50vh]">
+          <div className="text-center">
+            <p className="text-gray-600">Product not found</p>
+            <Button onClick={() => navigate("/admin/viewproducts")} className="mt-4">
+              Back to Products
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      <Toaster position="top-right" richColors />
+      
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin/viewproducts")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Products
+          </Button>
+          <h1 className="text-2xl font-bold">Edit Product</h1>
+        </div>
+      </div>
+
+      {/* Breadcrumbs */}
+      <div className="text-sm breadcrumbs mb-6">
+        <button className="text-gray-500" onClick={() => navigate("/admin/home")}>
+          Home &gt;
+        </button>
+        <button className="text-gray-500" onClick={() => navigate("/admin/Dashboard")}>
+          Dashboard &gt;
+        </button>
+        <button className="text-gray-500" onClick={() => navigate("/admin/viewproducts")}>
+          View Products &gt;
+        </button>
+        <span className="text-gray-500">Edit Product</span>
+      </div>
+
+      {/* Cropper Modal */}
+      {images.map(
+        (image, index) =>
+          image && (
+            <div
+              key={index}
+              className="crop-container fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            >
+              <div
+                className="bg-white p-4 rounded-lg shadow-lg flex flex-col"
+                style={{
+                  width: cropperDimensions.width,
+                  height: cropperDimensions.height,
+                }}
+              >
+                <Cropper
+                  src={image}
+                  style={{ height: "100%", width: "100%" }}
+                  aspectRatio={2 / 3}
+                  guides={true}
+                  crop={onCropComplete(index)}
+                  onInitialized={(instance) => {
+                    setCropperInstances((prev) => {
+                      const newInstances = [...prev];
+                      newInstances[index] = instance;
+                      return newInstances;
+                    });
+                  }}
+                  cropMove={handleCropMove}
+                  minCropBoxHeight={10}
+                  minCropBoxWidth={10}
+                  responsive={true}
+                  checkOrientation={false}
+                  zoomable={true}
+                  scalable={true}
+                  movable={true}
+                />
+                <div className="mt-4 flex justify-end">
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    onClick={() => {
+                      handleCropped(index);
+                      toast.success("Image updated successfully");
                     }}
                   >
-                    <Cropper
-                      src={image}
-                      style={{ height: "100%", width: "100%" }}
-                      aspectRatio={2 / 3}
-                      guides={true}
-                      crop={onCropComplete(index)}
-                      onInitialized={(instance) => {
-                        setCropperInstances((prev) => {
-                          const newInstances = [...prev];
-                          newInstances[index] = instance;
-                          return newInstances;
-                        });
-                      }}
-                      cropMove={handleCropMove}
-                      minCropBoxHeight={10}
-                      minCropBoxWidth={10}
-                      responsive={true}
-                      checkOrientation={false}
-                      zoomable={true}
-                      scalable={true}
-                      movable={true}
-                    />
-                    <div className="mt-4 flex justify-end">
-                      <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        onClick={() => {
-                          handleCropped(index);
-                          toast.success("Image updated successfully");
-                        }}
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </div>
+                    Done
+                  </button>
                 </div>
-              )
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 md:p-6">
-            {/* Left column */}
-            <div className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              {/* Name input */}
-              <div className="grid grid-cols-4 items-center gap-2 md:gap-4">
-                <Label
-                  htmlFor="name"
-                  className="text-right text-sm md:text-base font-medium text-gray-700 dark:text-gray-200"
-                >
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  onChange={(e) => {
-                    setEditName(e.target.value);
-                    setError((prev) => ({ ...prev, editName: "" }));
-                  }}
-                  value={editName}
-                  className="col-span-3 text-sm md:text-base border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                />
-                <span className="text-red-700 mt-10 ms-2">
-                  {error && error.editName}
-                </span>
               </div>
+            </div>
+          )
+      )}
 
-              {/* Price input */}
-              <div className="grid grid-cols-4 items-center gap-2 md:gap-4">
-                <Label
-                  htmlFor="price"
-                  className="text-right text-sm md:text-base font-medium text-gray-700 dark:text-gray-200"
-                >
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  onChange={(e) => {
-                    setEditPrice(e.target.value);
-                    setError((prev) => ({ ...prev, editPrice: "" }));
+      {/* Main Content */}
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left column */}
+          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+            {/* Name input */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right font-medium text-gray-700">
+                Name
+              </Label>
+              <Input
+                id="name"
+                onChange={(e) => {
+                  setEditName(e.target.value);
+                  setError((prev) => ({ ...prev, editName: "" }));
+                }}
+                value={editName}
+                className="col-span-3 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="text-red-700 mt-10 ms-2">
+                {error && error.editName}
+              </span>
+            </div>
+
+            {/* Price input */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="price" className="text-right font-medium text-gray-700">
+                Price
+              </Label>
+              <Input
+                id="price"
+                onChange={(e) => {
+                  setEditPrice(e.target.value);
+                  setError((prev) => ({ ...prev, editPrice: "" }));
+                }}
+                value={editPrice}
+                className="col-span-3 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="text-red-700 mt-10 ms-2">
+                {error && error.editPrice}
+              </span>
+            </div>
+
+            {/* Sale Price input */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="salePrice" className="text-right font-medium text-gray-700">
+                Sale Price
+              </Label>
+              <Input
+                id="salePrice"
+                onChange={(e) => {
+                  setEditSalePrice(e.target.value);
+                  setError((prev) => ({ ...prev, editSalePrice: "" }));
+                }}
+                value={editSalePrice}
+                className="col-span-3 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="text-red-700 mt-10 ms-2">
+                {error && error.editSalePrice}
+              </span>
+            </div>
+
+            {/* Description textarea */}
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="description" className="text-right pt-2 font-medium text-gray-700">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={editDescription || ""}
+                onChange={(e) => {
+                  setEditDescription(e.target.value);
+                  setError((prev) => ({ ...prev, editDescription: "" }));
+                }}
+                className="col-span-3 h-32 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter product description"
+              />
+              <span className="text-red-700 mt-10 ms-2">
+                {error && error.editDescription}
+              </span>
+            </div>
+
+            {/* Category select */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="category" className="text-right font-medium text-gray-700">
+                Category
+              </Label>
+              <div className="col-span-3">
+                <Select
+                  onValueChange={(value) => {
+                    setEditCategory(value);
                   }}
-                  value={editPrice}
-                  className="col-span-3 text-sm md:text-base border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                />
-                <span className="text-red-700 mt-10 ms-2">
-                  {error && error.editPrice}
-                </span>
-              </div>
-
-              {/* Sale Price input */}
-              <div className="grid grid-cols-4 items-center gap-2 md:gap-4">
-                <Label
-                  htmlFor="salePrice"
-                  className="text-right text-sm md:text-base font-medium text-gray-700 dark:text-gray-200"
+                  value={editCategory}
+                  className="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  Sale Price
-                </Label>
-                <Input
-                  id="salePrice"
-                  onChange={(e) => {
-                    setEditSalePrice(e.target.value);
-                    setError((prev) => ({ ...prev, editSalePrice: "" }));
-                  }}
-                  value={editSalePrice}
-                  className="col-span-3 text-sm md:text-base border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                />
-                <span className="text-red-700 mt-10 ms-2">
-                  {error && error.editSalePrice}
-                </span>
+                  <span className="text-red-700 mt-10 ms-2">
+                    {error && error.editCategory}
+                  </span>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={product.category.name} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {categories.map((cat, index) => (
+                      <SelectItem key={index} value={cat._id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+          </div>
 
-              {/* Description textarea */}
-              <div className="grid grid-cols-4 items-start gap-2 md:gap-4">
-                <Label
-                  htmlFor="description"
-                  className="text-right pt-2 text-sm md:text-base font-medium text-gray-700 dark:text-gray-200"
-                >
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  value={editDescription || ""}
-                  onChange={(e) => {
-                    setEditDescription(e.target.value);
-                    setError((prev) => ({ ...prev, editDescription: "" }));
-                  }}
-                  className="col-span-3 h-24 md:h-32 text-sm md:text-base border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                  placeholder="Enter product description"
-                />
-                <span className="text-red-700 mt-10 ms-2">
-                  {error && error.editDescription}
-                </span>
-              </div>
-
-              {/* Category select */}
-              <div className="grid grid-cols-4 items-center gap-2 md:gap-4">
-                <Label
-                  htmlFor="category"
-                  className="text-right text-sm md:text-base font-medium text-gray-700 dark:text-gray-200"
-                >
-                  Category
-                </Label>
-                <div className="col-span-3">
+          {/* Right column */}
+          <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+            {/* Sizes and Stock */}
+            <Label className="font-medium text-gray-700">
+              Sizes and Stock
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              {product.sizes.map((item, index) => (
+                <div key={item.size} className="flex items-center space-x-2">
+                  <span className="w-8 font-medium">
+                    {item.size}
+                  </span>
                   <Select
                     onValueChange={(value) => {
-                      setEditCategory(value);
-                      // setError((prev) => ({ ...prev, editCategory: "" }))
+                      const updatedSizes = [...sizes];
+                      updatedSizes[index].stock = parseInt(value);
+                      setEditSizes(updatedSizes);
                     }}
-                    className="w-full text-sm md:text-base border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <span className="text-red-700 mt-10 ms-2">
-                      {error && error.editCategory}
-                    </span>
-                    <SelectTrigger className="w-full text-sm md:text-base ">
-                      <SelectValue placeholder={product.category.name} />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={item.stock} />
                     </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat, index) => (
-                        <SelectItem key={index} value={cat._id}>
-                          {cat.name}
+                    <SelectContent className="bg-white">
+                      {Array.from({ length: 30 }, (_, i) => i).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
+              ))}
             </div>
 
-            {/* Right column */}
-            <div className="space-y-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              {/* Sizes and Stock */}
-              <Label className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-200">
-                Sizes and Stock
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
-                {product.sizes.map((item, index) => (
-                  <div key={item.size} className="flex items-center space-x-2">
-                    <span className="w-8 text-xs md:text-sm font-medium">
-                      {item.size}
-                    </span>
-                    <Select
-                      onValueChange={(value) => {
-                        const updatedSizes = [...sizes];
-                        updatedSizes[index].stock = parseInt(value);
-                        setEditSizes(updatedSizes);
-                      }}
-                      className="w-full text-sm md:text-base border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                    >
-                      <SelectTrigger className="w-full text-xs md:text-sm">
-                        <SelectValue placeholder={item.stock} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 30 }, (_, i) => i).map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
-              </div>
-
-              {/* Product Images */}
-              <Label className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-200">
-                Product Images
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="border-2 h-32 w-24 md:h-56 md:w-36 aspect-square border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2 text-center flex items-center justify-center flex-col relative bg-white dark:bg-gray-800 hover:border-blue-500 transition-colors"
-                  >
-                    {croppedImages[index] || editImages[index] ? (
-                      <>
-                        <img
-                          src={croppedImages[index] || editImages[index]}
-                          alt={`Product Image ${index + 1}`}
-                          className="rounded-lg h-full w-full object-cover"
-                        />
-                        <span
-                          onClick={() =>
-                            handleRemoveImage(
-                              croppedImages[index] || editImages[index]
-                            )
-                          }
-                          className="my-2 cursor-pointer text-red-500 hover:underline text-xs md:text-sm"
-                        >
-                          Remove
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-gray-500 text-xs md:text-sm">
-                        Add Image
+            {/* Product Images */}
+            <Label className="font-medium text-gray-700">
+              Product Images
+            </Label>
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="border-2 h-56 w-36 aspect-square border-dashed border-gray-300 rounded-lg p-2 text-center flex items-center justify-center flex-col relative bg-white hover:border-blue-500 transition-colors"
+                >
+                  {croppedImages[index] || editImages[index] ? (
+                    <>
+                      <img
+                        src={croppedImages[index] || editImages[index]}
+                        alt={`Product Image ${index + 1}`}
+                        className="rounded-lg h-full w-full object-cover"
+                      />
+                      <span
+                        onClick={() =>
+                          handleRemoveImage(
+                            croppedImages[index] || editImages[index]
+                          )
+                        }
+                        className="my-2 cursor-pointer text-red-500 hover:underline text-sm"
+                      >
+                        Remove
                       </span>
-                    )}
-                    <input
-                      style={{ height: "80%" }}
-                      className="absolute inset-0 w-full opacity-0 cursor-pointer upload-area"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        handleImageUpload(e, index);
-                        setError((prev) => ({ ...prev, editImages: "" }));
-                      }}
-                    />
-                  </div>
-                ))}
-                <span className="text-red-700 mt-10 ms-2">
-                  {error && error.editImages}
-                </span>
-              </div>
+                    </>
+                  ) : (
+                    <span className="text-gray-500 text-sm">
+                      Add Image
+                    </span>
+                  )}
+                  <input
+                    style={{ height: "80%" }}
+                    className="absolute inset-0 w-full opacity-0 cursor-pointer upload-area"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      handleImageUpload(e, index);
+                      setError((prev) => ({ ...prev, editImages: "" }));
+                    }}
+                  />
+                </div>
+              ))}
+              <span className="text-red-700 mt-10 ms-2">
+                {error && error.editImages}
+              </span>
             </div>
           </div>
+        </div>
 
-          <DialogFooter className="mt-6 flex justify-end space-x-2">
-            <DialogClose asChild>
-              <Button
-                className="bg-blue-500 text-white font-medium px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all sm:px-6 sm:py-3 lg:px-8 lg:py-4"
-                type="button"
-              >
-                Close
-              </Button>
-            </DialogClose>
-            <button
-              onClick={handleEdit}
-              className="bg-blue-500 text-white font-medium px-4 py-2 rounded-md hover:bg-blue-600"
-            >
-              Save changes
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        {/* Footer Actions */}
+        <div className="mt-6 flex justify-end space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin/viewproducts")}
+            className="px-6 py-3"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEdit}
+            className="bg-blue-500 text-white px-6 py-3 hover:bg-blue-600"
+          >
+            Save Changes
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
-export default React.memo(EditProductPop);
+export default EditProduct;

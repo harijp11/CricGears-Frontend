@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import validateProduct from "../../../util/productValidation.jsx";
 import Loading from "../../shared/Loading.jsx";
 import { getAdminCategories } from "../../../services/categoryService.jsx";
+import { Label } from "../../ui/label.jsx";
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -286,48 +287,64 @@ export default function AddProduct() {
           <div className="bg-white relative shadow-md rounded-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Image Upload Section */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[...Array(5)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="border-2 min-h-40 max-w-40 border-dashed border-gray-300 rounded-lg p-4 text-center flex items-center justify-center flex-col relative"
-                  >
-                    {croppedImages[index] ? (
-                      <img src={croppedImages[index]} alt="Cropped Image" />
-                    ) : (
-                      <>
-                        <input
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleImageUpload(e, index)}
-                        />
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-1 text-sm text-gray-600">
-                          Browse Image
-                        </p>
-                      </>
-                    )}
-                  </div>
-                ))}
-                <span className="text-red-700 absolute bottom-5  mt-10 ms-2">
+              <div>
+                <Label className="text-base font-medium text-gray-700 mb-4 block">
+                  Product Images
+                </Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[...Array(5)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="border-2 min-h-40 max-w-40 border-dashed border-gray-300 rounded-lg p-4 text-center flex items-center justify-center flex-col relative"
+                    >
+                      {croppedImages[index] ? (
+                        <img src={croppedImages[index]} alt="Cropped Image" />
+                      ) : (
+                        <>
+                          <input
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, index)}
+                          />
+                          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                          <p className="mt-1 text-sm text-gray-600">
+                            Browse Image
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-red-700 mt-2 block">
                   {error && error.croppedImages}
                 </span>
               </div>
 
               {/* Product Details Section */}
               <div className="space-y-4">
-                <Input
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter Product name here..."
-                />
-                <span className="text-red-700  mt-10 ms-2">
-                  {error && error.name}
-                </span>
+                <div>
+                  <Label
+                    htmlFor="name"
+                    className="text-base font-medium text-gray-700 mb-2 block"
+                  >
+                    Product Name
+                  </Label>
+                  <Input
+                    id="name"
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter Product name here..."
+                  />
+                  <span className="text-red-700 mt-1 block">
+                    {error && error.name}
+                  </span>
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="mb-2 font-semibold">Stocks Quantity</p>
+                    <Label className="text-base font-medium text-gray-700 mb-2 block">
+                      Stock Quantity
+                    </Label>
                     <div className="grid grid-cols-2 gap-2">
                       {sizes.map((item, index) => (
                         <div key={item.size} className="flex items-center">
@@ -343,7 +360,7 @@ export default function AddProduct() {
                             <SelectTrigger className="w-[80px]">
                               <SelectValue placeholder="0" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-white">
                               {Array.from({ length: 30 }, (_, i) => i + 1).map(
                                 (num) => (
                                   <SelectItem key={num} value={num.toString()}>
@@ -358,56 +375,87 @@ export default function AddProduct() {
                     </div>
                   </div>
                   <div>
-                    <Input
-                      placeholder="enter your price"
-                      onChange={(e) => setPrice(e.target.value)}
-                    />{" "}
-                    <span className="text-red-700  mt-10 ms-2">
-                      {error && error.price}
-                    </span>
-                    <Input
-                      onChange={(e) => {
-                        setSalePrice(e.target.value);
-                      }}
-                      placeholder="Enter Sale Price here..."
-                      className="mt-4"
-                    />{" "}
-                    <span className="text-red-700  mt-10 ms-2">
-                      {error && error.salePrice}
-                    </span>
+                    <div>
+                      <Label 
+                        htmlFor="price" 
+                        className="text-base font-medium text-gray-700 mb-2 block"
+                      >
+                        Price
+                      </Label>
+                      <Input
+                        id="price"
+                        placeholder="Enter your price"
+                        onChange={(e) => setPrice(e.target.value)}
+                      />
+                      <span className="text-red-700 mt-1 block">
+                        {error && error.price}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <Label 
+                        htmlFor="salePrice" 
+                        className="text-base font-medium text-gray-700 mb-2 block"
+                      >
+                        Sale Price
+                      </Label>
+                      <Input
+                        id="salePrice"
+                        onChange={(e) => {
+                          setSalePrice(e.target.value);
+                        }}
+                        placeholder="Enter Sale Price here..."
+                      />
+                      <span className="text-red-700 mt-1 block">
+                        {error && error.salePrice}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Select
-                    onValueChange={(value) => {
-                      setCatId(value);
-                      // console.log(value);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat, index) => {
-                        return (
-                          <SelectItem key={index} value={cat._id}>
-                            {cat.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <Label className="text-base font-medium text-gray-700 mb-2 block">
+                      Category
+                    </Label>
+                    <Select
+                      onValueChange={(value) => {
+                        setCatId(value);
+                        // console.log(value);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        {categories.map((cat, index) => {
+                          return (
+                            <SelectItem key={index} value={cat._id}>
+                              {cat.name}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+                
                 <div className="mt-6 space-y-4">
+                  <Label 
+                    htmlFor="description" 
+                    className="text-base font-medium text-gray-700 mb-2 block"
+                  >
+                    Product Description
+                  </Label>
                   <Textarea
+                    id="description"
                     onChange={(e) => {
                       setDescription(e.target.value);
                     }}
                     placeholder="Enter Product Description here..."
                     className="min-h-[100px]"
                   />
-                  <span className="text-red-700  mt-10 ms-2">
+                  <span className="text-red-700 mt-1 block">
                     {error && error.description}
                   </span>
                 </div>

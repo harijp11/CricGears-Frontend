@@ -33,19 +33,29 @@ const Adminhome = React.lazy(() => import("./pages/Admin/AdminHome"))
 const AdminDashboard = React.lazy(() =>
   import("./pages/Admin/AdminDashboard"),
 )
-const Users = React.lazy(() => import("./components/Admin/Users"))
+const Users = React.lazy(() => import("./pages/Admin/AdminUserManagement"))
+const Category = React.lazy(() => import("./pages/Admin/AdminCategoryManagement"))
+const ProductList = React.lazy(() => import("./pages/Admin/AdminProductsManagement"))
+const CouponList = React.lazy(() => import("./pages/Admin/AdminCouponManagement"))
+const AdminOrdersComponent = React.lazy(() => import("./pages/Admin/AdminOrderManagement"))
+const SalesReport = React.lazy(() => import("./pages/Admin/AdminSalesManagement"))
+
+
 const AddCategory = React.lazy(() => import("./components/Admin/Category/AddCategory"))
-const Category = React.lazy(() => import("./components/Admin/Category/ViewCategory"))
 const EditCategory = React.lazy(() => import("./components/Admin/Category/EditCategory"))
 const AddProduct = React.lazy(() => import("./components/Admin/Product/AddProduct"))
-const ProductList = React.lazy(() => import("./components/Admin/Product/Viewproducts"))
-const AdminOrdersComponent = React.lazy(() => import("./components/Admin/Order/Vieworders"))
+const EditProduct = React.lazy(()=>import("./components/Admin/Product/EditProduct"))
+
+
+
+
+
 const ViewOrderDetailsAdmin = React.lazy(() => import("./components/Admin/Order/VieworderDtails"))
 const AddCategoryOffer = React.lazy(() => import("./components/Admin/offer/AddCategoryOffer"))
 const AddProductOffer = React.lazy(() => import("./components/Admin/offer/AddProductOffer"))
 const AddCoupon = React.lazy(() => import("./components/Admin/coupon/Addcoupon"))
-const CouponList = React.lazy(() => import("./components/Admin/coupon/Coupon"))
-const SalesReport = React.lazy(() => import("./components/Admin/SalesReport"))
+
+
 const NotFound = React.lazy(() => import("./pages/PageNotefound"))
 
 function App() {
@@ -112,9 +122,11 @@ function App() {
           <Route path="/admin/editCategory/:id" element={<AdminProtectedRoute element={EditCategory} />} />
           {/*admin productRoutes*/}
           <Route path="/admin/addProduct" element={<AdminProtectedRoute element={AddProduct} />} />
+           <Route path="/admin/editProduct/:productId" element={<AdminProtectedRoute element={EditProduct} />} />
           <Route path="/admin/viewproducts" element={<AdminProtectedRoute element={ProductList} />} />
           {/*admin orderroutes*/}
           <Route path="/admin/vieworders" element={<AdminProtectedRoute element={AdminOrdersComponent} />} />
+          
           <Route path="/admin/viewdetails/:id" element={<AdminProtectedRoute element={ViewOrderDetailsAdmin} />} />
           <Route
             path="/admin/addcategoryoffer/:id/:categoryName"
