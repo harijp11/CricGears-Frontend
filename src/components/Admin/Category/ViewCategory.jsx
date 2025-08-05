@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import {
@@ -8,13 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
-import { PlusCircle, Pencil, MoreVertical, FolderX } from "lucide-react";
+import { PlusCircle, Pencil, MoreVertical, FolderX, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../../AxiosInstance";
-// import { Switch } from "../../ui/switch";
 import { toast, Toaster } from "sonner";
 import Pagination from "../../shared/Pagination";
-import { fetchCatApi,removeOffer } from "../../../services/OffersApi";
+import { fetchCatApi, removeOffer } from "../../../services/OffersApi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { fetchPaginatedCategoriesAPI, toggleCategoryStatusAPI } from "../../../services/categoryService";
+import { useDebounce } from "../../shared/useBounce";
 
 export default function Category() {
   const [categories, setCategories] = useState([]);
@@ -29,8 +29,10 @@ export default function Category() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [offer, setOffer] = useState([]);
-  const [catId,setCatId] = useState(null)
+  const [catId, setCatId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // Added for search
   const limit = 5;
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const [reload, setReload] = useState(false);
 
@@ -38,10 +40,9 @@ export default function Category() {
 
   const fetchData = async () => {
     try {
-      const response = await fetchPaginatedCategoriesAPI({ page, limit });
+      const response = await fetchPaginatedCategoriesAPI({ page, limit, search: debouncedSearchQuery });
       setTotalPages(response.data.totalPages);
       setCategories(response.data.categories);
-      // console.log("kkkkkkkkkkkkkkkkkkkkkkkk",response.data)
     } catch (err) {
       if (err.response && err.response.status === 404) {
         return toast.error(err.response.data.message);
@@ -49,6 +50,7 @@ export default function Category() {
     }
   };
 
+  
   function handleEdit(id) {
     navigate(`/admin/editcategory/${id}`);
   }
@@ -57,16 +59,15 @@ export default function Category() {
     try {
       setToggle(!toggle);
       const response = await toggleCategoryStatusAPI({ _id, isActive });
-       if (response.data.success) {
+      if (response.data.success) {
+        const updatedStatus = response.data.updatedCategory?.isActive ?? !isActive;
 
-      const updatedStatus = response.data.updatedCategory?.isActive ?? !isActive;
-
-      setCategories((prev) =>
-        prev.map((cat) =>
-          cat._id === _id ? { ...cat, isActive: updatedStatus } : cat
-        )
-      );
-    }
+        setCategories((prev) =>
+          prev.map((cat) =>
+            cat._id === _id ? { ...cat, isActive: updatedStatus } : cat
+          )
+        );
+      }
       toast.success(response.data.message);
     } catch (err) {
       if (err.response && err.response.status === 400) {
@@ -85,14 +86,12 @@ export default function Category() {
     }
   }
 
-  async function removeCategoryOffer(_id,categoryid){
+  async function removeCategoryOffer(_id, categoryid) {
     try {
-        const response = await removeOffer(
-          _id,categoryid
-        );
-        toast.success(response.data.message)
-        setReload(true);
-    }catch(err){
+      const response = await removeOffer(_id, categoryid);
+      toast.success(response.data.message);
+      setReload(true);
+    } catch (err) {
       console.log(err);
       if (err.response) {
         toast.error(err.response.data.message);
@@ -104,7 +103,7 @@ export default function Category() {
     fetchData();
     fetchCatOffer();
     setReload(false);
-  }, [page,reload]);
+  }, [page, reload, debouncedSearchQuery]);
 
   return (
     <>
@@ -130,17 +129,28 @@ export default function Category() {
                 className="text-gray-500"
                 onClick={() => navigate("/admin/viewcategory")}
               >
-                View Categories{" "}
+                View Categories
               </button>
             </div>
-            <br />
           </div>
-          <Button
-            onClick={() => navigate("/admin/addCategory")}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" /> Create Category
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <input
+                type="text"
+                placeholder="Search categories..."
+                className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            </div>
+            <Button
+              onClick={() => navigate("/admin/addCategory")}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" /> Create Category
+            </Button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           {categories.length != 0 && (
@@ -159,7 +169,6 @@ export default function Category() {
                   const categoryOffer = offer.find(
                     (f) => f.targetId === category._id
                   );
-                  //  { setCatId(category._id)}
                   return (
                     <TableRow key={category._id}>
                       <TableCell className="font-medium">
@@ -210,17 +219,17 @@ export default function Category() {
                                   : "Enable"}
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                            onClick={() => {
-                              if (categoryOffer) {
-                                removeCategoryOffer(categoryOffer._id,category._id);
-                              } else {
-                                navigate(
-                                  `/admin/addcategoryoffer/${category._id}/${category.name}`
-                                );
-                              }
-                            }}
-                          >
-                              {categoryOffer ? "Remove Offer" : "Add Offer"} 
+                                onClick={() => {
+                                  if (categoryOffer) {
+                                    removeCategoryOffer(categoryOffer._id, category._id);
+                                  } else {
+                                    navigate(
+                                      `/admin/addcategoryoffer/${category._id}/${category.name}`
+                                    );
+                                  }
+                                }}
+                              >
+                                {categoryOffer ? "Remove Offer" : "Add Offer"}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

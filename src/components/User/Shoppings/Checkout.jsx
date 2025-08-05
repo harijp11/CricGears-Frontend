@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Address from "../profile/userAddress";
 import { useSelector } from "react-redux";
@@ -6,9 +7,9 @@ import master from "../../../assets/master.png";
 import rupya from "../../../assets/rupya.png";
 import verify from "../../../assets/verify.svg";
 import Pending from "../../../assets/pending.svg";
-
 import { toast } from "sonner";
 import { Button } from "@nextui-org/react";
+
 import {
   Modal,
   ModalContent,
@@ -36,46 +37,41 @@ import {
 import { useNavigate } from "react-router-dom";
 import PaymentComponent from "../../../util/paymentComponent";
 import ConfirmationModal from "../../shared/confirmationModal";
-import { applyCouponApi, updateCouponDataApi } from "../../../services/coupon";
+import { applyCouponApi, updateCouponDataApi, FetchCouponsApi, FetchCoupons } from "../../../services/coupon";
 import { fetchWalletInfoApi } from "../../../services/wallet";
 import { fetchCartItemsAPI } from "../../../services/cartService";
 import { checkProductAvailabilityAPI } from "../../../services/productsService";
 import { placeOrderAPI } from "../../../services/orderService";
+import { Copy } from "lucide-react";
 
 export default function Checkout() {
   const userData = useSelector((store) => store.user.userDatas);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [cartItems, setCartItems] = useState([]);
-
   const [total_amount, settotal_amount] = useState(0);
   const [total_discount, settotal_discount] = useState(0);
   const [coupon_Discount, setcoupon_Discount] = useState(0);
   const [total_price_with_discount, settotal_price_with_discount] = useState(0);
-
   const [couponCode, setCouponCode] = useState("");
   const [verifiedCouponCode, setverifiedCouponCode] = useState("");
   const [couponData, setCouponData] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
-
   const [Walletbalance, setWalletBalance] = useState(0);
-
   const [cart_id, setCart_id] = useState();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [orderDetails, setOrderDetails] = useState({});
   const [deliveryDate, setDeliveryDate] = useState(null);
   const [placedAt, setPlacedAt] = useState(null);
   const [placedTime, setPlacedTime] = useState(null);
-
   const [failedPayment, setFailedPayment] = useState(false);
-
   const [modalOpen, setModalOpen] = useState(false);
-
   const [modalContent, setModalContent] = useState({
     title: "",
     message: "",
     onConfirm: null,
   });
+  const [coupons, setCoupons] = useState([]); // New state for coupons
 
   const navigate = useNavigate();
 
@@ -95,6 +91,17 @@ export default function Checkout() {
       if (err.response) {
         return toast.error(err.response.data.message);
       }
+    }
+  }
+
+  // Fetch coupons
+  async function fetchCoupons() {
+    try {
+      const response = await FetchCoupons();
+      setCoupons(response.data.Coupons);
+    } catch (err) {
+      console.log("error", err);
+      toast.error("Failed to load coupons");
     }
   }
 
@@ -118,19 +125,8 @@ export default function Checkout() {
       }
   
       const cartResponse = await fetchCartItemsAPI(userData._id);
-
       const latestCartItems = cartResponse.data.cartItems.items;
-      
       const latestTotalAmount = cartResponse.data.cartItems.totalCartPrice;
-      
-      // if (JSON.stringify(latestCartItems) !== JSON.stringify(cartItems) || 
-      //     latestTotalAmount !== total_amount) {
-      //   toast.warning("Item has been changed. Please check data order.");
-      //   setCartItems(latestCartItems);
-      //   settotal_amount(latestTotalAmount);
-       
-      //   return false;
-      // }
   
       if (selectedPaymentMethod == "wallet") {
         payment_status = "Paid";
@@ -170,20 +166,20 @@ export default function Checkout() {
       setDeliveryDate(formattedDate);
   
       const orderPayload = {
-      user: userData._id,
-      cartItems: latestCartItems,
-      total_amount: latestTotalAmount,
-      total_discount,
-      coupon_discount: coupon_Discount,
-      total_price_with_discount,
-      shipping_address: selectedAddress,
-      payment_method: selectedPaymentMethod,
-      payment_status,
-      cart_id,
-      deliveryDate: formattedDate,
-    };
+        user: userData._id,
+        cartItems: latestCartItems,
+        total_amount: latestTotalAmount,
+        total_discount,
+        coupon_discount: coupon_Discount,
+        total_price_with_discount,
+        shipping_address: selectedAddress,
+        payment_method: selectedPaymentMethod,
+        payment_status,
+        cart_id,
+        deliveryDate: formattedDate,
+      };
 
-    const res = await placeOrderAPI(orderPayload);
+      const res = await placeOrderAPI(orderPayload);
   
       setOrderDetails(res?.data?.order);
   
@@ -198,6 +194,17 @@ export default function Checkout() {
       toast.error(errorMessage);
     }
   }
+
+   const handleCopyCoupon = (code) => {
+    navigator.clipboard.writeText(code)
+      .then(() => {
+        toast.success(`Coupon "${code}" copied to clipboard`);
+      })
+      .catch((err) => {
+        console.error("Failed to copy coupon:", err);
+        toast.error("Failed to copy coupon code");
+      });
+  };
 
   async function handleUpdateCoupon(coupon_id, user_id) {
     try {
@@ -268,6 +275,7 @@ export default function Checkout() {
 
   useEffect(() => {
     fetchCartItems();
+    fetchCoupons(); // Fetch coupons on component mount
     if (couponData) {
       const discount = coupon_Discount;
       const maxDiscount = couponData.maxDiscountAmount;
@@ -349,7 +357,6 @@ export default function Checkout() {
                           {orderDetails?.paymentMethod}
                         </TableCell>
                       </TableRow>
-
                       {orderDetails?.couponDiscount > 0 && (
                         <TableRow key="5">
                           <TableCell>Coupon Discount</TableCell>
@@ -358,7 +365,6 @@ export default function Checkout() {
                           </TableCell>
                         </TableRow>
                       )}
-
                       {orderDetails?.totalDiscount > 0 && (
                         <TableRow key="6">
                           <TableCell>Total Savings</TableCell>
@@ -367,7 +373,6 @@ export default function Checkout() {
                           </TableCell>
                         </TableRow>
                       )}
-
                       <TableRow key="7">
                         <TableCell>Shipping Fee</TableCell>
                         <TableCell className="text-right">
@@ -384,7 +389,6 @@ export default function Checkout() {
                       </TableRow>
                     </TableBody>
                   </Table>
-
                   <h1 className="text-green-700 font-bold">
                     Arriving By {deliveryDate}
                   </h1>
@@ -516,9 +520,9 @@ export default function Checkout() {
                         Minimum order amount ₹1000
                       </span>
                     )}
-                     {total_price_with_discount > 10000 && (
+                    {total_price_with_discount > 10000 && (
                       <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded-full ml-2">
-                        Cash on delivery not vailable for above  ₹10000
+                        Cash on delivery not available for above ₹10000
                       </span>
                     )}
                   </div>
@@ -589,22 +593,43 @@ export default function Checkout() {
               </div>
             </div>
 
-            <div className="mt-6 flex">
-              <input
-                type="text"
-                placeholder="Coupon code"
-                className="flex-grow border rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={couponCode}
-                onChange={(e) => {
-                  setCouponCode(e.target.value.toUpperCase());
-                }}
-              />
-              <button
-                onClick={couponData ? handleRemoveCoupon : handleApplyCoupon}
-                className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 transition duration-300"
-              >
-                {couponData ? 'Remove Coupon' : 'Apply Coupon'}
-              </button>
+            <div className="mt-6">
+              <div className="flex">
+                <input
+                  type="text"
+                  placeholder="Coupon code"
+                  className="flex-grow border rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value.toUpperCase());
+                  }}
+                />
+                <button
+                  onClick={couponData ? handleRemoveCoupon : handleApplyCoupon}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 transition duration-300"
+                >
+                  {couponData ? 'Remove Coupon' : 'Apply Coupon'}
+                </button>
+              </div>
+              {coupons.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Available Coupons:</h3>
+                  <ul className="list-disc pl-5 text-sm text-gray-600">
+                    {coupons.map((coupon) => (
+                      <li key={coupon._id} className="flex items-center justify-between">
+                        <span>{coupon.code}</span>
+                        <button
+                          onClick={() => handleCopyCoupon(coupon.code)}
+                          className="text-blue-500 hover:text-blue-700 transition duration-300"
+                          aria-label={`Copy coupon ${coupon.code}`}
+                        >
+                          <Copy size={16} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {selectedPaymentMethod === "Cash on Delivery" && (
@@ -620,7 +645,7 @@ export default function Checkout() {
                 total={total_price_with_discount.toFixed(2)}
                 handlePlaceOrder={handlePlaceOrder}
                 cartItems={cartItems}
-                 userData={userData} 
+                userData={userData} 
               />
             )}
             {selectedPaymentMethod === "wallet" && selectedAddress && (
@@ -649,4 +674,3 @@ export default function Checkout() {
     </div>
   );
 }
-

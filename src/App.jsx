@@ -54,6 +54,7 @@ const ViewOrderDetailsAdmin = React.lazy(() => import("./components/Admin/Order/
 const AddCategoryOffer = React.lazy(() => import("./components/Admin/offer/AddCategoryOffer"))
 const AddProductOffer = React.lazy(() => import("./components/Admin/offer/AddProductOffer"))
 const AddCoupon = React.lazy(() => import("./components/Admin/coupon/Addcoupon"))
+const UpdateCoupon = React.lazy(()=>import("./components/Admin/coupon/EditCoupon"))
 
 
 const NotFound = React.lazy(() => import("./pages/PageNotefound"))
@@ -138,6 +139,7 @@ function App() {
           />
           {/*admin coupon routes*/}
           <Route path="/admin/addcoupon" element={<AdminProtectedRoute element={AddCoupon} />} />
+          <Route path="/admin/editcoupon/:couponId" element={<AdminProtectedRoute element={UpdateCoupon} />} />
           <Route path="/admin/viewcoupons" element={<AdminProtectedRoute element={CouponList} />} />
           {/*admin sales Report*/}
           <Route path="/admin/salesreport" element={<AdminProtectedRoute element={SalesReport} />} />

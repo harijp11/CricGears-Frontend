@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   ChevronDown,
@@ -20,6 +21,7 @@ import ConfirmationModal from "../../shared/confirmationModal";
 import { Button } from "../../ui/button";
 import ConfirmationModalwithButtons from "../../shared/confirmationModal";
 import Pagination from "../../shared/Pagination";
+import { useDebounce } from "../../shared/useBounce"; // Added for debounced search
 
 const statusOptions = ["Pending", "Shipped", "Delivered"];
 
@@ -51,22 +53,20 @@ export default function AdminOrdersComponent() {
   });
   const [isOpenWithButton, setIsOpenWithButton] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
-
   const [orders, setOrders] = useState([]);
   const [expandedOrder, setExpandedOrder] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // Changed to searchQuery for consistency
+  const debouncedSearchQuery = useDebounce(searchTerm, 300); // Added for debounced search
   const navigate = useNavigate();
   const [permenent, setpermenent] = useState("");
   const [reload, setreload] = useState(false);
-
-  //pagination
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const limit = 10;
 
   async function fetchOrders() {
     try {
-      const response = await fetchAdminOrdersAPI({ page, limit });
+      const response = await fetchAdminOrdersAPI({ page, limit, search: debouncedSearchQuery });
       setTotalPages(response.data.totalPages);
       setPage(response.data.currentPage);
       setOrders(response.data.orders);
@@ -120,16 +120,7 @@ export default function AdminOrdersComponent() {
     navigate(`/admin/viewdetails/${orderId}`);
   };
 
-  // const filteredOrders = orders.filter(
-  //     (order)=>
-  //         order.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     order.shippingAddress.name.toLowerCase().includes(
-  //         searchTerm.toLowerCase() ||
-  //         order.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  //     )
-  // )
-
-  const handleReturnReq=async(orderId, itemId, reason, explanation)=>{
+  const handleReturnReq = async (orderId, itemId, reason, explanation) => {
     setModalContent({
       title: "Return Order",
       message: (
@@ -184,12 +175,12 @@ export default function AdminOrdersComponent() {
       },
     });
     setIsOpenWithButton(true);
-  }
+  };
 
   useEffect(() => {
     fetchOrders();
     setreload(false);
-  }, [reload, page]);
+  }, [reload, page, debouncedSearchQuery]);
 
   return (
     <div className="container mx-auto px-0 py-0 sm:px-4 sm:py-8">
@@ -202,25 +193,37 @@ export default function AdminOrdersComponent() {
       />
       <div>
         <h1 className="text-2xl md:text-3xl font-bold mb-6">View Orders</h1>
-        <div className="container mx-auto px-0 py-0 mb-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/admin/Dashboard"
-                  className="text-gray-600 hover:text-black"
-                >
-                  Dashboard
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-gray-400" />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-gray-900">
-                  view orders
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+          <div className="container mx-auto px-0 py-0">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    href="/admin/Dashboard"
+                    className="text-gray-600 hover:text-black"
+                  >
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="text-gray-400" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-gray-900">
+                    view orders
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+          <div className="relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search orders..."
+              className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          </div>
         </div>
       </div>
 

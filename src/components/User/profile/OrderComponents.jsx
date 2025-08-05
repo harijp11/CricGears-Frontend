@@ -119,10 +119,15 @@ export default function OrdersComponent() {
   };
 
   const handleReturnReq= async (orderId,itemId)=>{
+    
     setModalContent({
       title: "Return Order",
       message: "Are you sure you want to return this order?",
       onConfirm: async (reason, explanation) => {
+        console.log("reacing on confirm")
+         if (!reason || reason.trim().length < 3 || !explanation || explanation.trim().length < 3) {
+          return toast.warning("Return reason must be at least 3 characters long");
+        }
         try {
          
           //register return req

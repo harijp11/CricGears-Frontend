@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Tag, IndianRupee, Calendar, Users, Copy,Ticket } from "lucide-react";
-import { FetchCouponsApi } from "../../../services/coupon";
+import { FetchCoupons } from "../../../services/coupon";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import {
@@ -19,7 +19,7 @@ export default function userCouponList(){
 
   async function fetchAllCoupons(){
     try {
-      const response = await FetchCouponsApi();
+      const response = await FetchCoupons();
       const coupons = response.data.Coupons
       // console.log("coupons details",response.data.Coupons)
       // console.log(response.data.Coupons.map((coupon)=>coupon.usersApplied))

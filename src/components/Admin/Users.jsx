@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import {
@@ -8,19 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-
+import { FolderX, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../AxiosInstance";
-
 import { toast, Toaster } from "sonner";
-// import { Input } from "../ui/Input";
-import { FolderX, Search } from "lucide-react";
+import Pagination from "../shared/Pagination";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/Slice/UserSlice";
-import Pagination from "../shared/Pagination";
 import ConfirmationModal from "../shared/confirmationModal";
 import { getUsersAPI, toggleUserStatusAPI } from "../../services/adminService";
+import { useDebounce } from "../shared/useBounce"; // Added for debounced search
 
 export default function Users() {
   const [page, setPage] = useState(1);
@@ -34,16 +33,17 @@ export default function Users() {
     message: "",
     onConfirm: null,
   });
-
   const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
   const [toggle, setToggle] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); // Added for search
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); // Debounce search by 300ms
 
   useEffect(
     () => {
       const fetchUserData = async () => {
         try {
-          const response = await getUsersAPI(page, limit);
+          const response = await getUsersAPI(page, limit, debouncedSearchQuery);
           setTotalPages(response.data.totalPages);
           setUsers(response.data.users);
         } catch (err) {
@@ -56,9 +56,7 @@ export default function Users() {
       };
       fetchUserData();
     },
-    [
-       page
-    ]
+    [page, debouncedSearchQuery]
   );
 
   const handleStatus = async (_id, isActive) => {
@@ -71,7 +69,6 @@ export default function Users() {
         try {
           const response = await toggleUserStatusAPI(_id, isActive);
           if (response.data.success) {
-              
             setUsers((prevUsers) =>
               prevUsers.map((user) =>
                 user._id === _id ? { ...user, isActive: !isActive } : user
@@ -125,6 +122,16 @@ export default function Users() {
             </div>
             <br />
           </div>
+          <div className="relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search users..."
+              className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          </div>
         </div>
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           {users.length != 0 && (
@@ -173,7 +180,7 @@ export default function Users() {
             </Table>
           )}
 
-          {users.length !== 0 && (
+          {users.length != 0 && (
             <Pagination page={page} setPage={setPage} totalPages={totalPages} />
           )}
         </div>

@@ -95,17 +95,19 @@ export function SignUp() {
       setIsOtpDialogOpen(false);
       // console.log(response.data.message);
     } catch (err) {
+      console.log("err",err)
       if (err.response && err.response.status === 404) {
-        toast.error(response.data.message)
+        toast.error(err.response.data.message)
         console.error(err.response.data.message);
       } else if (err.response && err.response.status === 401) {
-        toast.error(response.data.message)
+        toast.error(err.response.data.message)
         console.error(err.response.data.message);
-      }
+      }else{
       toast.error("An error occurred. Please try again.")
       console.error("An error occurred. Please try again.");
+      }
     }
-    setIsOtpDialogOpen(false);
+    // setIsOtpDialogOpen(false);
   };
 
   return (

@@ -46,9 +46,6 @@ export function SiteAdminHeader() {
         <div className="flex items-center space-x-4">
         {adminData ? (<>
             <div
-              onClick={() => {
-                navigate("/profile/myprofile");
-              }}
               className="flex items-center cursor-pointer justify-center bg-gray-300 text-black rounded-full w-10 h-10 font-bold"
               >
               {adminData.email.charAt(0).toUpperCase()}

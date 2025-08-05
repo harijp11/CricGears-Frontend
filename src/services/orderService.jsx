@@ -92,9 +92,9 @@ export const getOrderDetailsByIdAPI = async (id) => {
   return response
 };
 
-export const fetchAdminOrdersAPI = async ({ page, limit }) => {
+export const fetchAdminOrdersAPI = async ({ page, limit,search }) => {
   const response = await axiosInstance.get(`/admin/orders`, {
-    params: { page, limit },
+    params: { page, limit,search },
   });
   return response
 };

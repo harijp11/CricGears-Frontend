@@ -39,11 +39,11 @@ export const toggleCategoryStatusAPI = async ({ _id, isActive }) => {
   return response
 };
 
-export const fetchPaginatedCategoriesAPI = async ({ page, limit }) => {
+export const fetchPaginatedCategoriesAPI = async ({ page, limit, search = "" }) => {
   const response = await axiosInstance.get(
-    `/admin/fetchCategories?page=${page}&limit=${limit}`
+    `/admin/fetchCategories?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
   );
-  return response
+  return response;
 };
 
 export const getAdminCategories = async () => {

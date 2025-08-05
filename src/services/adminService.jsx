@@ -1,7 +1,7 @@
 import axiosInstance from "../AxiosInstance";
 
-export const getUsersAPI = async (page, limit = 5) => {
-  const response = await axiosInstance.get(`/admin/users?page=${page}=${limit}`);
+export const getUsersAPI = async (page, limit = 5,search = "") => {
+  const response = await axiosInstance.get(`/admin/users?page=${page}=${limit}&search=${encodeURIComponent(search)}`);
   return response
 };
 
