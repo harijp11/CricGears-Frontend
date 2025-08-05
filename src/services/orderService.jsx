@@ -37,10 +37,10 @@ export const downloadInvoiceAPI = async (orderData) => {
 };
 
 
-export const getUserOrdersAPI = async (userId, page = 1, limit = 10) => {
+export const getUserOrdersAPI = async (userId, page = 1, limit = 10,search="") => {
   try {
     const response = await axiosInstance.get(
-      `/user/orders/${userId}?page=${page}&limit=${limit}`
+      `/user/orders/${userId}?page=${page}&limit=${limit}&search=${search}`
     );
     return response
   } catch (error) {

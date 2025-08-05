@@ -4,7 +4,7 @@ import ConfirmationModal from "../../shared/confirmationModal";
 import Pagination from "../../shared/Pagination";
 import ReturnConfirmation from "../../shared/ReturnConfirmation";
 import ContinuePayment from "../../../util/ContinuePayment";
-import { Package } from "lucide-react";
+import { Package, Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../../ui/breadcrumb";
-import { cancelOrderItemAPI, finishPaymentAPI, getUserOrdersAPI, requestReturnAPI } from "../../../services/orderService";
+import {
+  cancelOrderItemAPI,
+  finishPaymentAPI,
+  getUserOrdersAPI,
+  requestReturnAPI,
+} from "../../../services/orderService";
+import { useDebounce } from "../../shared/useBounce"; // Corrected from useBounce
 
 export default function OrdersComponent() {
   const navigate = useNavigate();
@@ -44,6 +50,10 @@ export default function OrdersComponent() {
   const [totalPages, setTotalPages] = useState(0);
   const limit = 2;
 
+  //search
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   const toggleOrderExpansion = (orderId) => {
     setExpandedOrders((prev) =>
       prev.includes(orderId)
@@ -54,11 +64,16 @@ export default function OrdersComponent() {
 
   async function fetchOrders() {
     try {
-      const response = await getUserOrdersAPI(userData._id, page, limit);
-      console.log("response data",response)
+      const response = await getUserOrdersAPI(
+        userData._id,
+        page,
+        limit,
+        debouncedSearchQuery
+      );
+      console.log("response data", response);
       setTotalPages(response.data.totalPages);
       setPage(response.data.currentPage);
-      setorders(response.data.orders); 
+      setorders(response.data.orders);
     } catch (err) {
       if (err.response) {
         console.log(err);
@@ -118,25 +133,30 @@ export default function OrdersComponent() {
     setIsOpen(true);
   };
 
-  const handleReturnReq= async (orderId,itemId)=>{
-    
+  const handleReturnReq = async (orderId, itemId) => {
     setModalContent({
       title: "Return Order",
       message: "Are you sure you want to return this order?",
       onConfirm: async (reason, explanation) => {
-        console.log("reacing on confirm")
-         if (!reason || reason.trim().length < 3 || !explanation || explanation.trim().length < 3) {
-          return toast.warning("Return reason must be at least 3 characters long");
+        console.log("reacing on confirm");
+        if (
+          !reason ||
+          reason.trim().length < 3 ||
+          !explanation ||
+          explanation.trim().length < 3
+        ) {
+          return toast.warning(
+            "Return reason must be at least 3 characters long"
+          );
         }
         try {
-         
           //register return req
           const response = await requestReturnAPI({
-      reason,
-      explanation,
-      orderId,
-      itemId,
-    });
+            reason,
+            explanation,
+            orderId,
+            itemId,
+          });
           toast.success(response.data.message);
           setreload(true);
           setIsOpenReturn(false);
@@ -149,25 +169,25 @@ export default function OrdersComponent() {
       },
     });
     setIsOpenReturn(true);
-  }
+  };
 
-  async function handleContinuePayment(orderId){
-      try{
-        const response = await finishPaymentAPI(orderId);
-        toast.success(response.data.message);
-        setreload(true);
-      }catch(err){
-        console.log(err);
+  async function handleContinuePayment(orderId) {
+    try {
+      const response = await finishPaymentAPI(orderId);
+      toast.success(response.data.message);
+      setreload(true);
+    } catch (err) {
+      console.log(err);
       if (err.response) {
         toast.error(err.response.data.message);
       }
-      }
+    }
   }
 
   useEffect(() => {
     fetchOrders();
     setreload(stubFalse);
-  }, [reload, page]);
+  }, [reload, page, debouncedSearchQuery]);
 
   return (
     <>
@@ -192,34 +212,49 @@ export default function OrdersComponent() {
           <>
             <h1 className="text-2xl md:text-3xl font-bold mb-4">My Orders</h1>
 
-            <div className="container mx-auto px-0 mb-4">
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink
-                      href="/"
-                      className="text-gray-600 hover:text-black"
-                    >
-                      Home
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-gray-400" />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink
-                      href="/viewprofile"
-                      className="text-gray-600 hover:text-black"
-                    >
-                      {userData.name}
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-gray-400" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="text-gray-900">
-                      My Orders
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+              <div className="container mx-auto px-0">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink
+                        href="/"
+                        className="text-gray-600 hover:text-black"
+                      >
+                        Home
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="text-gray-400" />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink
+                        href="/viewprofile"
+                        className="text-gray-600 hover:text-black"
+                      >
+                        {userData.name}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="text-gray-400" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="text-gray-900">
+                        My Orders
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+              <div className="relative w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Search orders..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
+              </div>
             </div>
             <div className="space-y-6">
               {orders.map((order) => (
@@ -283,8 +318,8 @@ export default function OrdersComponent() {
                       ) ? (
                         <div className="mt-2 sm:mt-0">
                           <ContinuePayment
-                          total={order.total_price_with_discount.toFixed(2)}
-                          onSuccess={() => handleContinuePayment(order._id)}
+                            total={order.total_price_with_discount.toFixed(2)}
+                            onSuccess={() => handleContinuePayment(order._id)}
                           />
                         </div>
                       ) : (
@@ -296,7 +331,11 @@ export default function OrdersComponent() {
                           <div className="font-medium">
                             <div className="text-gray-500">Coupon Discount</div>
                             <div>
-                              ₹{(order.totalAmount.toFixed(2)-order.total_price_with_discount.toFixed(2)).toFixed(2)}
+                              ₹
+                              {(
+                                order.totalAmount.toFixed(2) -
+                                order.total_price_with_discount.toFixed(2)
+                              ).toFixed(2)}
                             </div>
                           </div>
                           <div className="font-medium">
@@ -380,8 +419,8 @@ export default function OrdersComponent() {
                               {items.orderStatus !== "Delivered" &&
                                 items.orderStatus !== "Cancelled" &&
                                 items.orderStatus !== "Returned" &&
-                                items.orderStatus !== "Return Rejected" && (
-                                  !items?.returnReq?.request_status &&
+                                items.orderStatus !== "Return Rejected" &&
+                                !items?.returnReq?.request_status && (
                                   <span className="text-orange-500 text-xs sm:text-sm mb-2">
                                     {/* Return deadline:{" "} */}
                                     {Math.ceil(
@@ -404,8 +443,8 @@ export default function OrdersComponent() {
                               {items.orderStatus !== "Cancelled" &&
                                 items.orderStatus !== "Returned" &&
                                 items.orderStatus !== "Delivered" &&
-                                items.orderStatus !== "Return Rejected" && (
-                                  items.paymentStatus !== "Failed" &&
+                                items.orderStatus !== "Return Rejected" &&
+                                items.paymentStatus !== "Failed" && (
                                   <button
                                     onClick={() => {
                                       setOrderId(order._id);
@@ -428,12 +467,12 @@ export default function OrdersComponent() {
 
                                 return (
                                   items.orderStatus === "Delivered" &&
-                                    !items?.returnReq?.requestStatus &&
+                                  !items?.returnReq?.requestStatus &&
                                   remainingDays > 0 && (
                                     <button
-                                        onClick={() =>
-                                          handleReturnReq(order._id, items._id)
-                                        }
+                                      onClick={() =>
+                                        handleReturnReq(order._id, items._id)
+                                      }
                                       className="px-3 py-2 border-2 border-black text-black text-xs sm:text-sm rounded-md hover:bg-black hover:text-white transition-colors mb-2 w-full sm:w-auto"
                                     >
                                       Return Order
